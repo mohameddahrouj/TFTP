@@ -7,8 +7,8 @@ import java.net.InetAddress;
 
 /**
  * Server communicates with the intermediate host
- * Last edited January 16th, 2018
- * @author Mohamed Dahrouj
+ * Last edited January 30th, 2018
+ * @author Mohamed Dahrouj, Lava Tahir
  *
  */
 public class Server {
@@ -66,69 +66,7 @@ public class Server {
 		
 		writeRequest = byteArrayOutputStream.toByteArray();
 	}
-
-	/**
-	 * Send received packet to intermediate host
-	 * @throws Exception if packet invalid
-	 */
-	public void send(DatagramPacket receivedPacket) throws Exception {
-		
-		if(isPacketValid(receivedPacket)) {
-			if(packetRequestType(receivedPacket)==Request.READ) {
-				System.out.println("\nServer: Forming new read packet");
-				DatagramPacket newPacket = new DatagramPacket(readRequest, readRequest.length, address,  receivedPacket.getPort());
-				Resources.printPacketInformation(newPacket);
-				Resources.sendPacket(newPacket, sendingSocket);
-			}
-			else if(packetRequestType(receivedPacket)==Request.WRITE) {
-				System.out.println("\nServer: Forming new write packet");
-				DatagramPacket newPacket = new DatagramPacket(writeRequest, writeRequest.length, address,  receivedPacket.getPort());
-				Resources.printPacketInformation(newPacket);
-				
-				System.out.println("\nServer: Sending packet to intermediate host");
-				Resources.printPacketInformation(newPacket);
-				Resources.sendPacket(newPacket, sendingSocket);
-				System.out.println("Server: Packet sent!\n");
-			}
-			
-		}
-		else {
-			serverSocket.close();
-			sendingSocket.close();
-			throw new Exception("Invalid packet detected.");
-			
-		}    
-	}
 	
-	/**
-	 * Determine if packet is valid
-	 * @param packet Packet to check
-	 * @return True if packet is valid
-	 */
-	private boolean isPacketValid(DatagramPacket packet) {
-		
-		if(packetRequestType(packet)==Request.INVALID) {
-			return false;
-		}
-		return true;
-	}
-	
-	/**
-	 * Determine if packet is a read or write request
-	 * @param packet Packet
-	 * @return Request type of packet 
-	 */
-	private Request packetRequestType(DatagramPacket packet) {
-		//The second element of a read request should be 1
-		//Whereas the second element of a write request should be 2
-		if(packet.getData()[1] == (byte) 0x01) {
-			return Request.READ;
-		}
-		else if(packet.getData()[1] == (byte) 0x02) {
-			return Request.WRITE;
-		}
-		return Request.INVALID;
-	}
 	/**
 	 * Receive packet from intermediate host
 	 */

@@ -8,8 +8,8 @@ import java.util.Formatter;
 
 /**
  * Common class between Client, ErrorSimulator and Server to print, send and receive packets
- * Last edited January 16th, 2018 
- * @author Mohamed Dahrouj
+ * Last edited January 30th, 2018
+ * @author Mohamed Dahrouj, Lava Tahir
  *
  */
 public class Resources {

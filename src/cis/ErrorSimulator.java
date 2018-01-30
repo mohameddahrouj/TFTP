@@ -6,8 +6,8 @@ import java.net.InetAddress;
 
 /**
  * Error Simulator is the intermediary between client and server
- * Last edited January 16th, 2018 
- * @author Mohamed Dahrouj
+ * Last edited January 30th, 2018
+ * @author Mohamed Dahrouj, Lava Tahir
  *
  */
 public class ErrorSimulator {

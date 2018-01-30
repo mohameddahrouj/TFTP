@@ -8,9 +8,9 @@ import java.net.InetAddress;
 
 /**
  * This class is the client side for a server based on UDP/IP.
- * The client communicates with the intermediate host at the specified port.
- * Last edited January 16th, 2018
- * @author Mohamed Dahrouj Lava Tahir
+ * The client communicates with the error simulator at the specified port.
+ * Last edited January 30th, 2018
+ * @author Mohamed Dahrouj, Lava Tahir
  *
  */
 public class Client implements Runnable{

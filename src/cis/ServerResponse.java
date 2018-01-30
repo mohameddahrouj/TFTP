@@ -4,6 +4,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+/*
+*  ServerResponse is the class the server uses to send a response. It is a thread, so the
+*  server will create multiple server responses to handle the incoming requests.
+*  Last edited January 30th, 2018
+*  @author Mohamed Dahrouj, Lava Tahir
+* **/
+
 public class ServerResponse  implements Runnable{
     private DatagramPacket receivedPacket;
     private DatagramSocket sendingSocket, serverSocket;
@@ -48,6 +55,11 @@ public class ServerResponse  implements Runnable{
         }
         return Request.INVALID;
     }
+
+    /**
+     * Method to send packet to the error simulator to be forwarded to client.
+     * @throws Exception
+     */
     private void send() throws Exception{
         if(isPacketValid(receivedPacket)) {
             if(packetRequestType(receivedPacket)==Request.READ) {

@@ -13,7 +13,7 @@ import java.net.InetAddress;
  * @author Mohamed Dahrouj Lava Tahir
  *
  */
-public class Client {
+public class Client implements Runnable{
 	private DatagramSocket socket;
 	private byte[] readRequest;
 	private byte[] writeRequest;
@@ -23,11 +23,14 @@ public class Client {
 	private final String octet = "ocTEt";
 	private byte[] fileNameBytes;
 	private byte[] mode;
+
+	private Request requestType;
 	ByteArrayOutputStream byteArrayOutputStream;
 	
 	private InetAddress address;
 	
-	public Client() {
+	public Client(Request requestType) {
+		this.requestType = requestType;
 		try {
 			// Construct a datagram socket and bind it to any available
 	        // port on the local host machine. This socket will be used to
@@ -135,38 +138,41 @@ public class Client {
 		System.out.println("Client: Packet received:");
 		Resources.printPacketInformation(receivedPacket);
 	}
-	
-	/**
-	 * Send 5 read, 5 write and 1 invalid requests to intermediate host.
-	 * And receive
-	 */
-	public void sendAndReceive() {
-		for (int counter = 1; counter<= 10; counter++) {
-			if(counter %2 == 0 ) {
-				this.processRequest(Request.READ);
-			}
-			else {
-				this.processRequest(Request.WRITE);
-			}
-			// Slow things down (wait 5 seconds)
-			try {
-	          Thread.sleep(5000);
-			} catch (InterruptedException e ) {
-	          e.printStackTrace();
-	          System.exit(1);
-			}
-		}
-		this.processRequest(Request.INVALID);
+
+	@Override
+	public void run(){
+		this.processRequest(this.requestType);
 	}
-	
 	/**
 	 * Execute the client to send and receive requests to the port
 	 * @param args Arguments
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) {
-		Client client = new Client();
-		client.sendAndReceive();
+		/**
+		 * Send 5 read, 5 write and 1 invalid requests to intermediate host.
+		 * And receive
+		 */
+		for (int counter = 1; counter<= 10; counter++) {
+			if(counter %2 == 0 ) {
+				Thread readReqThread = new Thread(new Client(Request.READ));
+				readReqThread.start();
+			}
+			else {
+				Thread writeReqThread = new Thread(new Client(Request.WRITE));
+				writeReqThread.start();
+			}
+			// Slow things down (wait 5 seconds)
+			try {
+				Thread.sleep(2500);
+			} catch (InterruptedException e ) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+		Thread invalidReqThread = new Thread(new Client(Request.INVALID));
+		invalidReqThread.start();
+
 	}
 
 }

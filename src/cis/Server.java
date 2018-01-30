@@ -68,14 +68,10 @@ public class Server {
 	}
 
 	/**
-	 * Send and receive packets to intermediate host
+	 * Send received packet to intermediate host
 	 * @throws Exception if packet invalid
 	 */
-	public void sendAndReceive() throws Exception {
-		System.out.println("Waiting to receive a request from intermediate host...");
-		DatagramPacket receivedPacket = Resources.receivePacket(serverSocket);
-	    System.out.println("Server: Packet received:");
-	    Resources.printPacketInformation(receivedPacket);
+	public void send(DatagramPacket receivedPacket) throws Exception {
 		
 		if(isPacketValid(receivedPacket)) {
 			if(packetRequestType(receivedPacket)==Request.READ) {
@@ -133,21 +129,28 @@ public class Server {
 		}
 		return Request.INVALID;
 	}
-	
+	/**
+	 * Receive packet from intermediate host
+	 */
+	public void receive(){
+		System.out.println("Waiting to receive a request from intermediate host...");
+		DatagramPacket receivedPacket = Resources.receivePacket(serverSocket);
+		System.out.println("Server: Packet received:");
+		Resources.printPacketInformation(receivedPacket);
+
+		//create thread to handle response
+		Thread serverSendingThread = new Thread(new ServerResponse(receivedPacket, readRequest, writeRequest,
+				address, sendingSocket, serverSocket));
+		serverSendingThread.start();
+	}
 	/**
 	 * Execute server to communicate with intermediate host
 	 * @param args Arguments
 	 */
 	public static void main(String[] args) {
 		Server server = new Server();
-		try {
-			//Listen forever...
-			while(true) {
-				server.sendAndReceive();
-			}
-		} catch (Exception e) {
-			System.out.println("Packet is invalid!");
-			System.exit(1);
+		while(true) {
+			server.receive();
 		}
 	}
 

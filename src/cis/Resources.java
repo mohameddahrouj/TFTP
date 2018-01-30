@@ -3,6 +3,7 @@ package cis;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketTimeoutException;
 import java.util.Formatter;
 
 /**
@@ -68,7 +69,11 @@ public class Resources {
 	    try {
 			// Block until a datagram is received via the socket
 			socket.receive(receivePacket);
-		} 
+		}
+		catch(SocketTimeoutException e){
+	    	System.out.println("Socket has timed out. System will exit.");
+	    	System.exit(1);
+		}
 	    catch(IOException e) {
 			e.printStackTrace();
 			System.exit(1);

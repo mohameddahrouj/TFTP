@@ -36,6 +36,7 @@ public class Client implements Runnable{
 	        // port on the local host machine. This socket will be used to
 	        // send and receive UDP Datagram packets.
 			socket = new DatagramSocket();
+			socket.setSoTimeout(10000);
 			
 			//Initialize octet and mode bytes
 			fileNameBytes = filename.getBytes();

@@ -20,6 +20,7 @@ public class IntermediateHost {
 			clientSocket = new DatagramSocket(Resources.clientPort);
 			//Initialize server socket at any port
 			serverSocket = new DatagramSocket();
+			serverSocket.setSoTimeout(10000);
 			//Initialize address
 			address = InetAddress.getLocalHost();
 		} catch (Exception e) {

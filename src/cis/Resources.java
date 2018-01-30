@@ -7,7 +7,7 @@ import java.net.SocketTimeoutException;
 import java.util.Formatter;
 
 /**
- * Common class between Client, IntermediateHost and Server to print, send and receive packets
+ * Common class between Client, ErrorSimulator and Server to print, send and receive packets
  * Last edited January 16th, 2018 
  * @author Mohamed Dahrouj
  *

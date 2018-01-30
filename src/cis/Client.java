@@ -10,7 +10,7 @@ import java.net.InetAddress;
  * This class is the client side for a server based on UDP/IP.
  * The client communicates with the intermediate host at the specified port.
  * Last edited January 16th, 2018
- * @author Mohamed Dahrouj
+ * @author Mohamed Dahrouj Lava Tahir
  *
  */
 public class Client {

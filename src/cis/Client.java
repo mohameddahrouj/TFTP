@@ -61,32 +61,42 @@ public class Client implements Runnable{
 	}
 	
 	/**
-	 * Read request format as per specification
+	 * Read request format as per TFTP Specification
 	 * @throws IOException
 	 */
 	private void formatReadRequest() throws IOException {
 		byteArrayOutputStream.reset();
+		//opcode is 2 bytes 01
 		byteArrayOutputStream.write(0);
 		byteArrayOutputStream.write(1);
+		//filename
 		byteArrayOutputStream.write(fileNameBytes);
+		//1 byte 0
 		byteArrayOutputStream.write(0);
+		//mode
 		byteArrayOutputStream.write(mode);
+		//1 byte 0
 		byteArrayOutputStream.write(0);
 		
 		readRequest = byteArrayOutputStream.toByteArray();
 	}
 	
 	/**
-	 * Write request format as per specification
+	 * Write request format as per TFTP Specification
 	 * @throws IOException
 	 */
 	private void formatWriteRequest() throws IOException{
 		byteArrayOutputStream.reset();
+		//opcode is 2 bytes 02
 		byteArrayOutputStream.write(0);
 		byteArrayOutputStream.write(2);
+		//filename
 		byteArrayOutputStream.write(fileNameBytes);
+		//1 byte 0
 		byteArrayOutputStream.write(0);
+		//mode
 		byteArrayOutputStream.write(mode);
+		//1 byte 0
 		byteArrayOutputStream.write(0);
 		
 		writeRequest = byteArrayOutputStream.toByteArray();

@@ -1,5 +1,7 @@
 package cis;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -14,8 +16,9 @@ import java.net.InetAddress;
 public class ServerResponse  implements Runnable{
     private DatagramPacket receivedPacket;
     private DatagramSocket sendingSocket, serverSocket;
-    private byte[] readRequest, writeRequest;
+    private byte[] readRequest, writeRequest, readResponse, writeResponse;
     private InetAddress address;
+    ByteArrayOutputStream byteArrayOutputStream;
 
 
     public ServerResponse(DatagramPacket receivedPacket, byte[] readRequest, byte[] writeRequest,
@@ -26,6 +29,10 @@ public class ServerResponse  implements Runnable{
         this.address = address;
         this.sendingSocket = sendingSocket;
         this.serverSocket = serverSocket;
+        //Initialize single byte array output stream
+        //Format Read and Write Requests
+        //Reset once done
+        byteArrayOutputStream = new ByteArrayOutputStream();
     }
     /**
      * Determine if packet is valid
@@ -63,14 +70,16 @@ public class ServerResponse  implements Runnable{
     private void send() throws Exception{
         if(isPacketValid(receivedPacket)) {
             if(packetRequestType(receivedPacket)==Request.READ) {
+                byte[] readResponse = formatReadResponse();
                 System.out.println("\nServer: Forming new read packet");
-                DatagramPacket newPacket = new DatagramPacket(readRequest, readRequest.length, address,  receivedPacket.getPort());
+                DatagramPacket newPacket = new DatagramPacket(readResponse, readResponse.length, address,  receivedPacket.getPort());
                 Resources.printPacketInformation(newPacket);
                 Resources.sendPacket(newPacket, sendingSocket);
             }
             else if(packetRequestType(receivedPacket)==Request.WRITE) {
                 System.out.println("\nServer: Forming new write packet");
-                DatagramPacket newPacket = new DatagramPacket(writeRequest, writeRequest.length, address,  receivedPacket.getPort());
+                byte[] writeResponse = formatWriteResponse();
+                DatagramPacket newPacket = new DatagramPacket(writeResponse, writeResponse.length, address,  receivedPacket.getPort());
                 Resources.printPacketInformation(newPacket);
 
                 System.out.println("\nServer: Sending packet to intermediate host");
@@ -86,6 +95,37 @@ public class ServerResponse  implements Runnable{
             throw new Exception("Invalid packet detected.");
 
         }
+    }
+    /**
+     * Read response format as per TFTP Specification. Responds with Data block block number 1 and no bytes of data.
+     * @throws IOException
+     */
+    private byte[] formatReadResponse() throws IOException{
+        byteArrayOutputStream.reset();
+        //opcode is 2 bytes 03
+        byteArrayOutputStream.write(0);
+        byteArrayOutputStream.write(3);
+        //block number 1
+        byteArrayOutputStream.write(0);
+        byteArrayOutputStream.write(1);
+        //0 bytes of data. so no more writes.
+
+        return byteArrayOutputStream.toByteArray();
+    }
+    /**
+     * Write response format as per TFTP Specification. Response with ACK block.
+     * @throws IOException
+     */
+    private byte[] formatWriteResponse() throws IOException{
+        byteArrayOutputStream.reset();
+        //opcode is 2 bytes 03
+        byteArrayOutputStream.write(0);
+        byteArrayOutputStream.write(4);
+        //block number 0
+        byteArrayOutputStream.write(0);
+        byteArrayOutputStream.write(0);
+
+        return byteArrayOutputStream.toByteArray();
     }
     @Override
     public void run(){

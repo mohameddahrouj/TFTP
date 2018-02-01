@@ -2,6 +2,7 @@ package cis;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -13,6 +14,8 @@ public abstract class Handler {
     protected byte prefix;
     protected InetAddress address;
     protected int port;
+
+    private final static int maxBlockLength = 516;
 
     public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port)
     {
@@ -35,5 +38,9 @@ public abstract class Handler {
 
     public abstract boolean process();
 
+    protected boolean isFinalPacket(DatagramPacket receivedPacket)
+    {
+        return receivedPacket.getData().length < maxBlockLength;
+    }
 
 }

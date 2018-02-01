@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 public class ReadHandler extends Handler {
 
     private static final byte prefixNumber = 4;
-    private final static int maxBlockLength = 516;
+
 
     public ReadHandler(DatagramSocket socket,InetAddress address, int port)
     {
@@ -63,9 +63,6 @@ public class ReadHandler extends Handler {
         }
     }
 
-    private boolean isFinalPacket(DatagramPacket receivedPacket)
-    {
-        return receivedPacket.getData().length < maxBlockLength;
-    }
+
 
 }

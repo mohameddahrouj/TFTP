@@ -14,7 +14,6 @@ import java.net.InetAddress;
 public class Server {
 	
 	private DatagramSocket serverSocket;
-	private DatagramSocket sendingSocket;
 	private InetAddress address;
 	private byte[] readRequest;
 	private byte[] writeRequest;
@@ -23,9 +22,6 @@ public class Server {
 		try {
 			//Initialize sockets
 			serverSocket = new DatagramSocket(Resources.serverPort);
-			sendingSocket = new DatagramSocket();
-
-
 			serverSocket.setSoTimeout(Resources.timeout);
 			//Initialize address
 			address = InetAddress.getLocalHost();
@@ -73,16 +69,42 @@ public class Server {
 	 * Receive packet from intermediate host
 	 */
 	public void receive(){
-		System.out.println("Waiting to receive a request from intermediate host...");
-		DatagramPacket receivedPacket = Resources.receivePacket(serverSocket);
-		System.out.println("Server: Packet received:");
-		Resources.printPacketInformation(receivedPacket);
-
-		//create thread to handle response
-		Thread serverSendingThread = new Thread(new ServerResponse(receivedPacket, readRequest, writeRequest,
-				address, sendingSocket, serverSocket));
-		serverSendingThread.start();
+		try {
+            System.out.println("Waiting to receive a request from intermediate host...");
+            DatagramPacket receivedPacket = Resources.receivePacket(serverSocket);
+            System.out.println("Server: Packet received:");
+            Resources.printPacketInformation(receivedPacket);
+            Request requestType = packetRequestType(receivedPacket);
+            //create thread to handle response
+            Thread serverSendingThread = new Thread(new ServerResponse(receivedPacket, requestType));
+            serverSendingThread.start();
+        }
+        catch (Exception e)
+        {
+            this.serverSocket.close();
+            e.printStackTrace();
+            System.exit(1);
+        }
 	}
+
+
+    /**
+     * Determine if packet is a read or write request
+     * @param packet Packet
+     * @return Request type of packet
+     */
+    private Request packetRequestType(DatagramPacket packet) throws Exception {
+        //The second element of a read request should be 1
+        //Whereas the second element of a write request should be 2
+        if(packet.getData()[1] == (byte) 0x01) {
+            return Request.READ;
+        }
+        else if(packet.getData()[1] == (byte) 0x02) {
+            return Request.WRITE;
+        }
+        throw new Exception("Invalid Packet Received");
+    }
+
 	/**
 	 * Execute server to communicate with intermediate host
 	 * @param args Arguments

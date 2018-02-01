@@ -44,23 +44,23 @@ public class ServerResponse  implements Runnable{
      */
     private void send() throws Exception {
 
-        if (this.type == Request.READ) {
-            byte[] readResponse = formatReadResponse();
-            System.out.println("\nServer: Forming new read packet");
-            DatagramPacket newPacket = new DatagramPacket(readResponse, readResponse.length, address, receivedPacket.getPort());
-            Resources.printPacketInformation(newPacket);
-            Resources.sendPacket(newPacket, sendingSocket);
-        } else if (this.type == Request.WRITE) {
-            System.out.println("\nServer: Forming new write packet");
-            byte[] writeResponse = formatWriteResponse();
-            DatagramPacket newPacket = new DatagramPacket(writeResponse, writeResponse.length, address, receivedPacket.getPort());
-            Resources.printPacketInformation(newPacket);
-
-            System.out.println("\nServer: Sending packet to intermediate host");
-            Resources.printPacketInformation(newPacket);
-            Resources.sendPacket(newPacket, sendingSocket);
-            System.out.println("Server: Packet sent!\n");
-        }
+//        if (this.type == Request.READ) {
+//            byte[] readResponse = formatReadResponse();
+//            System.out.println("\nServer: Forming new read packet");
+//            DatagramPacket newPacket = new DatagramPacket(readResponse, readResponse.length, address, receivedPacket.getPort());
+//            Resources.printPacketInformation(newPacket);
+//            Resources.sendPacket(newPacket, sendingSocket);
+//        } else if (this.type == Request.WRITE) {
+//            System.out.println("\nServer: Forming new write packet");
+//            byte[] writeResponse = formatWriteResponse();
+//            DatagramPacket newPacket = new DatagramPacket(writeResponse, writeResponse.length, address, receivedPacket.getPort());
+//            Resources.printPacketInformation(newPacket);
+//
+//            System.out.println("\nServer: Sending packet to intermediate host");
+//            Resources.printPacketInformation(newPacket);
+//            Resources.sendPacket(newPacket, sendingSocket);
+//            System.out.println("Server: Packet sent!\n");
+//        }
     }
 
     /**
@@ -79,22 +79,7 @@ public class ServerResponse  implements Runnable{
 
         return byteArrayOutputStream.toByteArray();
     }
-    /**
-     * Write response format as per TFTP Specification. Response with ACK block.
-     * @throws IOException
-     */
-    private byte[] formatWriteResponse() throws IOException{
-        byteArrayOutputStream.reset();
-        //opcode is 2 bytes 03
-        byteArrayOutputStream.write(0);
-        byteArrayOutputStream.write(4);
-        //block number 0
-        byteArrayOutputStream.write(0);
-        byteArrayOutputStream.write(0);
 
-        return byteArrayOutputStream.toByteArray();
-
-    }
 
     @Override
     public void run(){

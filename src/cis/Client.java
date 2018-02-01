@@ -16,7 +16,6 @@ import java.util.Scanner;
 public class Client implements Runnable{
 	private DatagramSocket socket;
 
-	private final String filename = "test.txt";
 	private final String octet = "ocTEt";
 	private byte[] mode;
 	private String fileName;
@@ -79,12 +78,10 @@ public class Client implements Runnable{
 		Resources.printPacketInformation(packet);
 		Resources.sendPacket(packet, socket);
 		System.out.println("Client: Packet sent!\n");
-		
-		//Process the received packet from socket
-		DatagramPacket receivedPacket = Resources.receivePacket(socket);
-		System.out.println("Client: Packet received:");
-		Resources.printPacketInformation(receivedPacket);
+
 	}
+
+
 
 
 	private String getFilename() {

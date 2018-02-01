@@ -20,7 +20,7 @@ public class ErrorSimulator {
 			clientSocket = new DatagramSocket(Resources.clientPort);
 			//Initialize server socket at any port
 			serverSocket = new DatagramSocket();
-			serverSocket.setSoTimeout(10000);
+			serverSocket.setSoTimeout(Resources.timeout);
 			//Initialize address
 			address = InetAddress.getLocalHost();
 		} catch (Exception e) {

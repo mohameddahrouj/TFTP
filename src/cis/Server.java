@@ -24,7 +24,9 @@ public class Server {
 			//Initialize sockets
 			serverSocket = new DatagramSocket(Resources.serverPort);
 			sendingSocket = new DatagramSocket();
-			
+
+
+			serverSocket.setSoTimeout(Resources.timeout);
 			//Initialize address
 			address = InetAddress.getLocalHost();
 			

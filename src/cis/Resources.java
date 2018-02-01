@@ -18,7 +18,9 @@ public class Resources {
 	
 	//Shared port between client and intermediate host
 	public static final int serverPort = 69;
-	
+
+	public static final int timeout = 100000;
+
 	/**
 	 * Print packet information as string or bytes
 	 * @param packet Packet to be printed as string or byte representation

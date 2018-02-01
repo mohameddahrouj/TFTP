@@ -1,10 +1,10 @@
 package cis;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Scanner;
 
 /**
  * This class is the client side for a server based on UDP/IP.
@@ -15,44 +15,28 @@ import java.net.InetAddress;
  */
 public class Client implements Runnable{
 	private DatagramSocket socket;
-	private byte[] readRequest;
-	private byte[] writeRequest;
-	private byte[] invalidRequest;
-	
+
 	private final String filename = "test.txt";
 	private final String octet = "ocTEt";
-	private byte[] fileNameBytes;
 	private byte[] mode;
+	private String fileName;
+	private Request type;
 
-	private Request requestType;
-	ByteArrayOutputStream byteArrayOutputStream;
-	
 	private InetAddress address;
 	
-	public Client(Request requestType) {
-		this.requestType = requestType;
+	public Client() {
 		try {
 			// Construct a datagram socket and bind it to any available
 	        // port on the local host machine. This socket will be used to
 	        // send and receive UDP Datagram packets.
 			socket = new DatagramSocket();
-			socket.setSoTimeout(10000);
-			
-			//Initialize octet and mode bytes
-			fileNameBytes = filename.getBytes();
+			//Initialize octet bytes
 			mode = octet.getBytes();
-			
-			//Initialize single byte array output stream
-			//Format Read, Write and Invalid Requests
-			//Reset once done
-			byteArrayOutputStream = new ByteArrayOutputStream();
-			this.formatReadRequest();
-			this.formatWriteRequest();
-			this.formatInvalidRequest();
-			byteArrayOutputStream.reset();
 			
 			//Initialize address
 			address = InetAddress.getLocalHost();
+			this.fileName = getFilename();
+			this.type = getRequestType();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -61,81 +45,33 @@ public class Client implements Runnable{
 	}
 	
 	/**
-	 * Read request format as per TFTP Specification
+	 * Read request format as per specification
 	 * @throws IOException
 	 */
-	private void formatReadRequest() throws IOException {
-		byteArrayOutputStream.reset();
-		//opcode is 2 bytes 01
-		byteArrayOutputStream.write(0);
-		byteArrayOutputStream.write(1);
-		//filename
-		byteArrayOutputStream.write(fileNameBytes);
-		//1 byte 0
-		byteArrayOutputStream.write(0);
-		//mode
-		byteArrayOutputStream.write(mode);
-		//1 byte 0
-		byteArrayOutputStream.write(0);
-		
-		readRequest = byteArrayOutputStream.toByteArray();
-	}
-	
-	/**
-	 * Write request format as per TFTP Specification
-	 * @throws IOException
-	 */
-	private void formatWriteRequest() throws IOException{
-		byteArrayOutputStream.reset();
-		//opcode is 2 bytes 02
-		byteArrayOutputStream.write(0);
-		byteArrayOutputStream.write(2);
-		//filename
-		byteArrayOutputStream.write(fileNameBytes);
-		//1 byte 0
-		byteArrayOutputStream.write(0);
-		//mode
-		byteArrayOutputStream.write(mode);
-		//1 byte 0
-		byteArrayOutputStream.write(0);
-		
-		writeRequest = byteArrayOutputStream.toByteArray();
-	}
-	
-	/**
-	 * Invalid request format
-	 * @throws IOException
-	 */
-	private void formatInvalidRequest() throws IOException {
-		byteArrayOutputStream.reset();
-		byteArrayOutputStream.write(0);
-		byteArrayOutputStream.write(3);
-		byteArrayOutputStream.write(fileNameBytes);
-		byteArrayOutputStream.write(0);
-		byteArrayOutputStream.write(mode);
-		byteArrayOutputStream.write(0);
-		
-		invalidRequest = byteArrayOutputStream.toByteArray();
+	private byte[] createRequest(){
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+		try {
+			byteArrayOutputStream.write(this.type.getBytes());
+			byteArrayOutputStream.write(this.fileName.getBytes());
+			byteArrayOutputStream.write(0);
+			byteArrayOutputStream.write(mode);
+			byteArrayOutputStream.write(0);
+		}
+		catch (IOException exception)
+		{
+			exception.printStackTrace();
+			System.exit(1);
+		}
+
+		return byteArrayOutputStream.toByteArray();
 	}
 	
 	/**
 	 * Process the requests then send and receive
-	 * @param requestType Request type maybe read, write or invalid
 	 */
-	private void processRequest(Request requestType) {
-		byte[] request;	
-		if(requestType == Request.READ) {
-			request = readRequest;
-			System.out.println("\nClient: Read Request");
-		}
-		else if(requestType == Request.WRITE) {
-			request = writeRequest;
-			System.out.println("\nClient: Write Request");
-		}
-		else { //Invalid Request
-			request = invalidRequest;
-			System.out.println("\nClient: Invalid Request");
-		}
+	private void processRequest() {
+		byte[] request = createRequest();
 		
 		//Send the packet given request, address and port
 		DatagramPacket packet = new DatagramPacket(request, request.length, address, Resources.clientPort);
@@ -150,9 +86,48 @@ public class Client implements Runnable{
 		Resources.printPacketInformation(receivedPacket);
 	}
 
+
+	private String getFilename() {
+		String path = "";
+		System.out.println("Please Enter file name: ");
+
+		while (path.isEmpty()) {
+			Scanner scanner = new Scanner(System.in);
+			path = scanner.nextLine();
+			if (path.isEmpty())
+				System.out.print("Not a valid file name. Please renter file name");
+		}
+
+		return path;
+	}
+
+	private Request getRequestType()
+	{
+		System.out.println("Please Enter Request type. R for Read and W for Write: ");
+		while(true)
+		{
+			Scanner scanner = new Scanner(System.in);
+			String type = scanner.nextLine();
+			if(type.equals(Request.READ.getType()))
+			{
+				return Request.READ;
+			}
+			else if(type.equals(Request.WRITE.getType()))
+			{
+				return Request.WRITE;
+			}
+			else
+			{
+				System.out.println("Not a valid request type.Type R for Read and W for Write");
+			}
+
+		}
+	}
+
+
 	@Override
 	public void run(){
-		this.processRequest(this.requestType);
+		this.processRequest();
 	}
 	/**
 	 * Execute the client to send and receive requests to the port
@@ -165,24 +140,16 @@ public class Client implements Runnable{
 		 * And receive
 		 */
 		for (int counter = 1; counter<= 10; counter++) {
-			if(counter %2 == 0 ) {
-				Thread readReqThread = new Thread(new Client(Request.READ));
-				readReqThread.start();
-			}
-			else {
-				Thread writeReqThread = new Thread(new Client(Request.WRITE));
-				writeReqThread.start();
-			}
-			// Slow things down (wait 5 seconds)
+
+			Thread readReqThread = new Thread(new Client());
+			readReqThread.start();
 			try {
 				Thread.sleep(2500);
-			} catch (InterruptedException e ) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
 		}
-		Thread invalidReqThread = new Thread(new Client(Request.INVALID));
-		invalidReqThread.start();
 
 	}
 

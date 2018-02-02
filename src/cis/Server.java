@@ -76,6 +76,7 @@ public class Server {
             Resources.printPacketInformation(receivedPacket);
             Request requestType = packetRequestType(receivedPacket);
             //create thread to handle response
+
             Thread serverSendingThread = new Thread(new ServerResponse(receivedPacket, requestType));
             serverSendingThread.start();
         }

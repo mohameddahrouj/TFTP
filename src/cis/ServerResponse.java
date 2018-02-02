@@ -16,21 +16,20 @@ import java.net.InetAddress;
 public class ServerResponse  implements Runnable{
     private DatagramPacket receivedPacket;
     private DatagramSocket sendingSocket;
-    private Request type;
-    private InetAddress address;
-    ByteArrayOutputStream byteArrayOutputStream;
+    private Request request;
+    private Handler handler;
 
 
-    public ServerResponse(DatagramPacket receivedPacket, Request type){
+    public ServerResponse(DatagramPacket receivedPacket, Request request){
         try {
             this.receivedPacket = receivedPacket;
-            this.type = type;
-            this.address = receivedPacket.getAddress();
+            this.request = request;
             this.sendingSocket = new DatagramSocket();
-            //Initialize single byte array output stream
-            //Format Read and Write Requests
-            //Reset once done
-            byteArrayOutputStream = new ByteArrayOutputStream();
+            if(request == Request.READ)
+                this.handler = new WriteHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort());
+            else
+                this.handler = new ReadHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort());
+
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -38,55 +37,17 @@ public class ServerResponse  implements Runnable{
         }
     }
 
-    /**
-     * Method to send packet to the error simulator to be forwarded to client.
-     * @throws Exception
-     */
-    private void send() throws Exception {
-
-//        if (this.type == Request.READ) {
-//            byte[] readResponse = formatReadResponse();
-//            System.out.println("\nServer: Forming new read packet");
-//            DatagramPacket newPacket = new DatagramPacket(readResponse, readResponse.length, address, receivedPacket.getPort());
-//            Resources.printPacketInformation(newPacket);
-//            Resources.sendPacket(newPacket, sendingSocket);
-//        } else if (this.type == Request.WRITE) {
-//            System.out.println("\nServer: Forming new write packet");
-//            byte[] writeResponse = formatWriteResponse();
-//            DatagramPacket newPacket = new DatagramPacket(writeResponse, writeResponse.length, address, receivedPacket.getPort());
-//            Resources.printPacketInformation(newPacket);
-//
-//            System.out.println("\nServer: Sending packet to intermediate host");
-//            Resources.printPacketInformation(newPacket);
-//            Resources.sendPacket(newPacket, sendingSocket);
-//            System.out.println("Server: Packet sent!\n");
-//        }
-    }
-
-    /**
-     * Read response format as per TFTP Specification. Responds with Data block block number 1 and no bytes of data.
-     * @throws IOException
-     */
-    private byte[] formatReadResponse() throws IOException{
-        byteArrayOutputStream.reset();
-        //opcode is 2 bytes 03
-        byteArrayOutputStream.write(0);
-        byteArrayOutputStream.write(3);
-        //block number 1
-        byteArrayOutputStream.write(0);
-        byteArrayOutputStream.write(1);
-        //0 bytes of data. so no more writes.
-
-        return byteArrayOutputStream.toByteArray();
-    }
-
-
     @Override
     public void run(){
         try {
-            this.send();
+
+            if(this.request == Request.WRITE)
+            {
+                ReadHandler readHandler = (ReadHandler)handler;
+                readHandler.sendAck(0);
+            }
+            handler.process();
             this.sendingSocket.close();
-            this.byteArrayOutputStream.close();
         }
         catch(Exception e){
             System.out.println("Packet is invalid!");

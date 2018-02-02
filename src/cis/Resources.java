@@ -65,7 +65,7 @@ public class Resources {
 	 */
 	public static DatagramPacket receivePacket(DatagramSocket socket){
 		// Construct a DatagramPacket for receiving packets
-		byte data[] = new byte[100];
+		byte data[] = new byte[516];
 
 		// Initialize the array to contain all FF bytes. This way, when
 		// the data is filled in we can truncate all trailing FFs, since

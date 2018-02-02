@@ -13,13 +13,13 @@ import java.util.Scanner;
  * @author Mohamed Dahrouj, Lava Tahir
  *
  */
-public class Client implements Runnable{
+public class Client {
 	private DatagramSocket socket;
 
 	private final String octet = "ocTEt";
 	private byte[] mode;
 	private String fileName;
-	private Request type;
+	private Request request;
 
 	private InetAddress address;
 	
@@ -35,7 +35,7 @@ public class Client implements Runnable{
 			//Initialize address
 			address = InetAddress.getLocalHost();
 			this.fileName = getFilename();
-			this.type = getRequestType();
+			this.request = getRequestType();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -51,7 +51,7 @@ public class Client implements Runnable{
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
 		try {
-			byteArrayOutputStream.write(this.type.getBytes());
+			byteArrayOutputStream.write(this.request.getBytes());
 			byteArrayOutputStream.write(this.fileName.getBytes());
 			byteArrayOutputStream.write(0);
 			byteArrayOutputStream.write(mode);
@@ -65,24 +65,38 @@ public class Client implements Runnable{
 
 		return byteArrayOutputStream.toByteArray();
 	}
-	
-	/**
-	 * Process the requests then send and receive
-	 */
-	private void processRequest() {
+
+	private void sendRequest()
+	{
 		byte[] request = createRequest();
-		
+
 		//Send the packet given request, address and port
 		DatagramPacket packet = new DatagramPacket(request, request.length, address, Resources.clientPort);
 		System.out.println("Client: Sending packet to intermediate host:");
 		Resources.printPacketInformation(packet);
 		Resources.sendPacket(packet, socket);
 		System.out.println("Client: Packet sent!\n");
-
 	}
+	
+	/**
+	 * Process the requests then send and receive
+	 */
+	public void processRequest() {
+
+		this.sendRequest();
+
+		if (this.request == Request.READ) {
+			ReadHandler readHandler = new ReadHandler(this.socket, address, Resources.clientPort);
+			readHandler.process();
 
 
+		} else if (this.request == Request.WRITE) {
 
+			WriteHandler writeHandler = new WriteHandler(this.socket, address, Resources.clientPort);
+			writeHandler.waitForACK();
+			writeHandler.process();
+		}
+	}
 
 	private String getFilename() {
 		String path = "";
@@ -100,7 +114,7 @@ public class Client implements Runnable{
 
 	private Request getRequestType()
 	{
-		System.out.println("Please Enter Request type. R for Read and W for Write: ");
+		System.out.println("Please Enter Request request. R for Read and W for Write: ");
 		while(true)
 		{
 			Scanner scanner = new Scanner(System.in);
@@ -115,39 +129,19 @@ public class Client implements Runnable{
 			}
 			else
 			{
-				System.out.println("Not a valid request type.Type R for Read and W for Write");
+				System.out.println("Not a valid request request.Type R for Read and W for Write");
 			}
-
 		}
 	}
 
-
-	@Override
-	public void run(){
-		this.processRequest();
-	}
 	/**
 	 * Execute the client to send and receive requests to the port
 	 * @param args Arguments
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) {
-		/**
-		 * Send 5 read, 5 write and 1 invalid requests to intermediate host.
-		 * And receive
-		 */
-		for (int counter = 1; counter<= 10; counter++) {
-
-			Thread readReqThread = new Thread(new Client());
-			readReqThread.start();
-			try {
-				Thread.sleep(2500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
-
+		Client client = new Client();
+		client.processRequest();
 	}
 
 }

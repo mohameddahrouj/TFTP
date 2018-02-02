@@ -3,6 +3,8 @@ package cis;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Error Simulator is the intermediary between client and server
@@ -14,8 +16,12 @@ public class ErrorSimulator {
 	DatagramSocket clientSocket;
 	DatagramSocket serverSocket;
 	InetAddress address;
+
+	private Map<Integer, Integer> connections;
+
 	public ErrorSimulator(){
 		try {
+			this.connections = new HashMap<>();
 			//Initialize client socket at the shared port
 			clientSocket = new DatagramSocket(Resources.clientPort);
 			//Initialize server socket at any port
@@ -38,10 +44,18 @@ public class ErrorSimulator {
 		//Process the received packet from client socket
 		System.out.println("Error Simulator: Packet received:");
 		Resources.printPacketInformation(receivedPacket);
-		
+		int serverPort = Resources.serverPort;
+
+		if(connections.containsKey(receivedPacket.getPort()))
+			serverPort = connections.get(receivedPacket.getPort());
+		else
+		{
+			connections.put(receivedPacket.getPort(),-1);
+		}
+
 		//Form new packet from received packet
 		System.out.println("\nError Simulator: Forming new Packet:");
-		DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length, address, Resources.serverPort);
+		DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length, address, serverPort);
 		Resources.printPacketInformation(newPacket);
 		
 		//Send the newly formed packet to server
@@ -55,7 +69,7 @@ public class ErrorSimulator {
 		DatagramPacket receivedServerPacket = Resources.receivePacket(serverSocket);
 		System.out.println("Error Simulator: Packet received from server:");
 		Resources.printPacketInformation(receivedServerPacket);
-		
+		connections.put(receivedPacket.getPort(),receivedServerPacket.getPort());
 		//Create new packet to send to client 
 		DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(), receivedServerPacket.getData().length, address, receivedPacket.getPort());
 		System.out.println("\nIntermediate Host: Sending packet to client");

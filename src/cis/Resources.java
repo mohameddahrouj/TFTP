@@ -66,6 +66,13 @@ public class Resources {
 	public static DatagramPacket receivePacket(DatagramSocket socket){
 		// Construct a DatagramPacket for receiving packets
 		byte data[] = new byte[100];
+
+		// Initialize the array to contain all FF bytes. This way, when
+		// the data is filled in we can truncate all trailing FFs, since
+		// we know a valid request must end with a 0 byte. Otherwise,
+		// all packets would be 100 bytes long.
+		java.util.Arrays.fill(data, (byte) 0xFF);
+
 		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
 	
 	    try {
@@ -80,6 +87,37 @@ public class Resources {
 			e.printStackTrace();
 			System.exit(1);
 		}
+
+		// Truncate to remove trailing FFs so that we only get the intended
+	    // data and its length.
+	    receivePacket.setData(truncateData(data));
+	    receivePacket.setLength(receivePacket.getData().length);
+		
 		return receivePacket;
+	}
+
+	/**
+	 * Remove trailing FF bytes from a byte array.
+	 * @param data The data
+	 * @return Data with trailing FF bytes removed
+	 */
+	public static byte[] truncateData(byte[] data) {
+		int endIndex = 0;
+		int i = data.length - 1;
+		
+		while (i >= 0 && data[i] == (byte) 0xFF) {
+			i--;
+		}
+		
+		if (i < 0) return new byte[] {};
+		
+		endIndex = i;
+		byte[] truncatedData = new byte[endIndex+1];
+		
+		for (i = 0; i <= endIndex; i++) {
+			truncatedData[i] = data[i];
+		}
+		
+		return truncatedData;
 	}
 }

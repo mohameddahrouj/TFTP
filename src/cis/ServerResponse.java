@@ -26,9 +26,9 @@ public class ServerResponse  implements Runnable{
             this.request = request;
             this.sendingSocket = new DatagramSocket();
             if(request == Request.READ)
-                this.handler = new WriteHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort());
+                this.handler = new WriteHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort(),"./src/cis/server.txt");
             else
-                this.handler = new ReadHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort());
+                this.handler = new ReadHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort(), "./src/cis/server.txt");
 
         }
         catch(Exception e) {
@@ -48,6 +48,7 @@ public class ServerResponse  implements Runnable{
             }
             handler.process();
             this.sendingSocket.close();
+
         }
         catch(Exception e){
             System.out.println("Packet is invalid!");

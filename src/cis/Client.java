@@ -34,7 +34,7 @@ public class Client {
 			
 			//Initialize address
 			address = InetAddress.getLocalHost();
-			this.fileName = getFilename();
+			this.fileName = "Client.txt";
 			this.request = getRequestType();
 		}
 		catch(Exception e) {
@@ -86,13 +86,13 @@ public class Client {
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
-			ReadHandler readHandler = new ReadHandler(this.socket, address, Resources.clientPort);
+			ReadHandler readHandler = new ReadHandler(this.socket, address, Resources.clientPort, "./src/cis/client.txt");
 			readHandler.process();
 
 
 		} else if (this.request == Request.WRITE) {
 
-			WriteHandler writeHandler = new WriteHandler(this.socket, address, Resources.clientPort);
+			WriteHandler writeHandler = new WriteHandler(this.socket, address, Resources.clientPort,"./src/cis/client.txt");
 			writeHandler.waitForACK();
 			writeHandler.process();
 		}

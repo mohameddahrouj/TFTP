@@ -14,9 +14,9 @@ public class ReadHandler extends Handler {
     private List<Byte> buffer;
     private final static int maxBlockLength = 516;
 
-    public ReadHandler(DatagramSocket socket,InetAddress address, int port)
+    public ReadHandler(DatagramSocket socket,InetAddress address, int port, String file)
     {
-        super(socket,prefixNumber, address, port);
+        super(socket,prefixNumber, address, port, file);
         this.buffer = new ArrayList<>();
     }
 
@@ -68,7 +68,7 @@ public class ReadHandler extends Handler {
     private void writeToFile()
     {
         try {
-            FileOutputStream stream = new FileOutputStream("./src/cis/client.txt"); // hardcoded for now
+            FileOutputStream stream = new FileOutputStream(this.file); // hardcoded for now
             stream.write(getData());
             stream.close();
         }

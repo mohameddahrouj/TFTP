@@ -120,4 +120,21 @@ public class Resources {
 		
 		return truncatedData;
 	}
+
+	/**
+	 * Determine if packet is a read or write request
+	 * @param packet Packet
+	 * @return Request type of packet
+	 */
+	public static Request packetRequestType(DatagramPacket packet) {
+		//The second element of a read request should be 1
+		//Whereas the second element of a write request should be 2
+		if(packet.getData()[1] == (byte) 0x01) {
+			return Request.READ;
+		}
+		else if(packet.getData()[1] == (byte) 0x02) {
+			return Request.WRITE;
+		}
+		return Request.INVALID;
+	}
 }

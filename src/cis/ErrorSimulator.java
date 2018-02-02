@@ -38,45 +38,70 @@ public class ErrorSimulator {
 	 * Send and receive requests between client and server
 	 */
 	public void sendAndReceive(){
+
+		int clientPort = this.forwardClientPacket();
+		this.forwardServerPacket(clientPort);
+	}
+
+	/**
+	 * forward the client packet to the server
+	 */
+	private int forwardClientPacket()
+	{
 		//Receive request from client
 		System.out.println("Waiting to receive a request from client...");
-		DatagramPacket receivedPacket = Resources.receivePacket(clientSocket);	
+		DatagramPacket receivedPacket = Resources.receivePacket(clientSocket);
 		//Process the received packet from client socket
 		System.out.println("Error Simulator: Packet received:");
 		Resources.printPacketInformation(receivedPacket);
-		int serverPort = Resources.serverPort;
 
-		if(connections.containsKey(receivedPacket.getPort()))
-			serverPort = connections.get(receivedPacket.getPort());
-		else
-		{
-			connections.put(receivedPacket.getPort(),-1);
-		}
+		int serverPort = getServerPort(receivedPacket);
 
 		//Form new packet from received packet
 		System.out.println("\nError Simulator: Forming new Packet:");
 		DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length, address, serverPort);
 		Resources.printPacketInformation(newPacket);
-		
+
 		//Send the newly formed packet to server
 		System.out.println("\nError Simulator: Sending packet to server:");
 		Resources.printPacketInformation(newPacket);
 		Resources.sendPacket(newPacket, serverSocket);
 		System.out.println("Error Simulator: Packet sent to server!\n");
-		
+		return receivedPacket.getPort();
+	}
+
+	private int getServerPort(DatagramPacket packet) {
+
+		int clientPort = packet.getPort();
+		if (connections.containsKey(clientPort)) {
+			return connections.get(clientPort);
+		}
+
+		connections.put(clientPort, -1);
+		return Resources.serverPort;
+	}
+
+	/**
+	 * forward the client packet to the server
+	 */
+	private void forwardServerPacket(int clientPort)
+	{
 		//Receive response packet from the server
 		System.out.println("Error Simulator: Waiting for packet from server\n");
 		DatagramPacket receivedServerPacket = Resources.receivePacket(serverSocket);
 		System.out.println("Error Simulator: Packet received from server:");
 		Resources.printPacketInformation(receivedServerPacket);
-		connections.put(receivedPacket.getPort(),receivedServerPacket.getPort());
-		//Create new packet to send to client 
-		DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(), receivedServerPacket.getData().length, address, receivedPacket.getPort());
+
+		this.connections.put(clientPort,receivedServerPacket.getPort());
+
+		//Create new packet to send to client
+		DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(), receivedServerPacket.getData().length, address, clientPort);
 		System.out.println("\nIntermediate Host: Sending packet to client");
 		Resources.printPacketInformation(sendPacket);
 		Resources.sendPacket(sendPacket, clientSocket);
 		System.out.println("\nError Simulator: Packet sent to client!\n");
 	}
+
 	/**
 	 * Execute the Error Simulator
 	 * @param args Arguments

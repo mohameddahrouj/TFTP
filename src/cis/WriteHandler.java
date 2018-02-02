@@ -14,14 +14,14 @@ public class WriteHandler extends Handler {
     private int blockNumber;
     private byte[] fileData;
 
-    public WriteHandler(DatagramSocket socket,InetAddress address, int port)
+    public WriteHandler(DatagramSocket socket,InetAddress address, int port, String file)
     {
-        super(socket,prefixNumber, address, port);
+        super(socket,prefixNumber, address, port,file);
         this.blockNumber = 0;
-        this.fileData = readFileAndConvertToByteArray("./src/cis/server.txt"); //hardcoded for now
+        this.fileData = readFileAndConvertToByteArray(this.file); //hardcoded for now
     }
 
-    protected boolean isFinalPacket() {
+    private boolean isFinalPacket() {
         return this.blockNumber * maxBlockSize > this.fileData.length;
     }
 

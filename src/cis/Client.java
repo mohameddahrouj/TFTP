@@ -113,7 +113,6 @@ public class Client {
 			path = scanner.nextLine();
 			if (path.isEmpty())
 				System.out.print("Not a valid file path. Please renter file path");
-			scanner.close();
 		}
 
 		return path;
@@ -132,17 +131,14 @@ public class Client {
 			String type = scanner.nextLine();
 			if(type.equals(Request.READ.getType()))
 			{
-				scanner.close();
 				return Request.READ;
 			}
 			else if(type.equals(Request.WRITE.getType()))
 			{
-				scanner.close();
 				return Request.WRITE;
 			}
 			else
 			{
-				scanner.close();
 				System.out.println("Not a valid request request.Type R for Read and W for Write");
 			}
 		}

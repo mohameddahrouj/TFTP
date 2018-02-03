@@ -1,4 +1,4 @@
-Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Vesolinovic
+Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
 Student Number: 100951843
 Due: January 19 @ 23:59
 
@@ -7,7 +7,7 @@ Due: January 19 @ 23:59
 ******File Structure******
 Package cis stands for client-intermediatehost-server.
 
-There are 5 java files within the source code.
+There are 8 java files within the source code.
 1. Client.java : Represents the client class which interacts with intermediate host
 2. ErrorSimulator.java : Represents the intermediate host which interacts between client and server
 3. Server.java : Represents the server which sends and receives to the intermediate host
@@ -19,9 +19,9 @@ There are 5 java files within the source code.
 
 ******Set-up Instructions******
 1. Start the Server (main)
-2. Start the Intermediate Host (main)
+2. Start the Error Simulator (main)
 3. Start the Client (main)
-4. After starting the Client you will be prompted to enter the request type. Type R for a read request and W for a Write Request.
+4. After starting the Client you will be prompted to enter the request type. Type R for a read request or W for a write request.
 5. Then you will be prompted to enter the path of a file.
 6a. If you enter a read request then the contents of the file that you specified will be transferred to the temp.txt file. The temp.txt can be found in the same folder as the README.
 6b. If you enter a write request then the contents of the temp.txt will be transferred to the file that you specified.

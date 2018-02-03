@@ -6,6 +6,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 
+/**
+ * This class will send the contents of a file to the receiver.
+ */
 public class WriteHandler extends Handler {
 
     private static final byte prefixNumber = 3;
@@ -18,9 +21,13 @@ public class WriteHandler extends Handler {
     {
         super(socket,prefixNumber, address, port,file);
         this.blockNumber = 0;
-        this.fileData = readFileAndConvertToByteArray(this.file); //hardcoded for now
+        this.fileData = readFileAndConvertToByteArray(this.file);
     }
 
+    /**
+     *
+     * @return return whether or not this is the final packet
+     */
     private boolean isFinalPacket() {
         return this.blockNumber * maxBlockSize > this.fileData.length;
     }
@@ -37,6 +44,9 @@ public class WriteHandler extends Handler {
         }
     }
 
+    /**
+     * This will a block of data to the receiver
+     */
     private void sendData()
     {
         System.out.println("Sending Block: " + this.blockNumber);
@@ -46,6 +56,9 @@ public class WriteHandler extends Handler {
         System.out.println("Data sent\n");
     }
 
+    /**
+     * Waits of the receiver to send an ACK
+     */
     public void waitForACK()
     {
         System.out.println("Wait to Receive ACK");
@@ -55,6 +68,11 @@ public class WriteHandler extends Handler {
         Resources.printPacketInformation(receivedPacket);
     }
 
+    /**
+     * Converts a file to a byte array
+     * @param filename the name of the file you want to convert to bytes
+     * @return the byte array of the file
+     */
     private byte[] readFileAndConvertToByteArray(String filename){
         File file = new File(filename);
         byte[] fileBytes = new byte[(int) file.length()];
@@ -79,6 +97,10 @@ public class WriteHandler extends Handler {
         return fileBytes;
     }
 
+    /**
+     * Creates the packet with the file data.
+     * @return a DatagramPacket
+     */
     private DatagramPacket createWritePacket()
     {
         try {
@@ -98,6 +120,10 @@ public class WriteHandler extends Handler {
         return null;
     }
 
+    /**
+     * Gets one block of data from the file.
+     * @return One block of the file
+     */
     private byte[] getFileData()
     {
         int start = this.blockNumber * maxBlockSize;

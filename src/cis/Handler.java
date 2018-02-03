@@ -15,6 +15,7 @@ public abstract class Handler {
 
     public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port, String file)
     {
+        // initialize variables
         this.sendAndReceiveSocket = sendAndReceiveSocket;
         this.prefix = prefix;
         this.address = address;
@@ -22,6 +23,11 @@ public abstract class Handler {
         this.file = file;
     }
 
+    /**
+     * Creates the beginning of the ACK and Data packet
+     * @param blockNumber
+     * @return
+     */
     protected byte[] getPrefix(int blockNumber) {
 
         byte[] ack = new byte[4];

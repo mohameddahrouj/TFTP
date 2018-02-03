@@ -8,6 +8,9 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class will receive data from a file and write it to a local file.
+ */
 public class ReadHandler extends Handler {
 
     private static final byte prefixNumber = 4;
@@ -57,6 +60,10 @@ public class ReadHandler extends Handler {
        return ((data[2] << 8) + data[3]);
     }
 
+    /**
+     * Save the data received from the sender.
+     * @param packet The packet received from the sender.
+     */
     private void bufferData(DatagramPacket packet)
     {
         byte[] data = packet.getData();
@@ -65,10 +72,13 @@ public class ReadHandler extends Handler {
         }
     }
 
+    /**
+     * Write the data received to a local file.
+     */
     private void writeToFile()
     {
         try {
-            FileOutputStream stream = new FileOutputStream(this.file); // hardcoded for now
+            FileOutputStream stream = new FileOutputStream(this.file);
             stream.write(getData());
             stream.close();
         }
@@ -91,6 +101,11 @@ public class ReadHandler extends Handler {
         return data;
     }
 
+    /**
+     * Checks if the packet is the if final packet
+     * @param receivedPacket The packet received from the sender.
+     * @return
+     */
     private boolean isFinalPacket(DatagramPacket receivedPacket)
     {
         return Resources.truncateData(receivedPacket.getData()).length < maxBlockLength;

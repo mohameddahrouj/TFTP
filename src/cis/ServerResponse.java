@@ -26,9 +26,23 @@ public class ServerResponse  implements Runnable{
             this.request = request;
             this.sendingSocket = new DatagramSocket();
             if(request == Request.READ)
-                this.handler = new WriteHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort(),"./src/cis/server.txt");
+            {
+                // if the request is a read then you will be sending data from a file to the client.
+                this.handler = new WriteHandler(
+                        sendingSocket,
+                        receivedPacket.getAddress(),
+                        receivedPacket.getPort(),
+                        "./src/cis/server.txt");
+            }
             else
-                this.handler = new ReadHandler(sendingSocket,receivedPacket.getAddress(),receivedPacket.getPort(), "./src/cis/server.txt");
+            {
+                // if the request is a write then you will be receiving data from a file.
+                this.handler = new ReadHandler(
+                        sendingSocket,
+                        receivedPacket.getAddress(),
+                        receivedPacket.getPort(),
+                        "./src/cis/server.txt");
+            }
 
         }
         catch(Exception e) {
@@ -37,12 +51,17 @@ public class ServerResponse  implements Runnable{
         }
     }
 
+    /**
+     * If it is read request then send the contents of a file to the client.
+     * If it is write request then receive contents of file from the client and write it to a file.
+     */
     @Override
     public void run(){
         try {
 
             if(this.request == Request.WRITE)
             {
+                // if the request is a write then send an ack before waiting to Receive data.
                 ReadHandler readHandler = (ReadHandler)handler;
                 readHandler.sendAck(0);
             }

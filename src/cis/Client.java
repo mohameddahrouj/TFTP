@@ -66,6 +66,9 @@ public class Client {
 		return byteArrayOutputStream.toByteArray();
 	}
 
+	/**
+	 * Sends the initial read/write request to error simulator
+	 */
 	private void sendRequest()
 	{
 		byte[] request = createRequest();
@@ -98,6 +101,10 @@ public class Client {
 		}
 	}
 
+	/**
+	 * Prompts the user for the name of the file it wants to read/write to
+	 * @return the name of the file
+	 */
 	private String getFilename() {
 		String path = "";
 		System.out.println("Please Enter file name: ");
@@ -112,6 +119,10 @@ public class Client {
 		return path;
 	}
 
+	/**
+	 * Prompts the user for the type of Request it wants
+	 * @return the request type
+	 */
 	private Request getRequestType()
 	{
 		System.out.println("Please Enter Request request. R for Read and W for Write: ");

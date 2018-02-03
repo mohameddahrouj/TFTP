@@ -40,5 +40,6 @@ There are 8 java files within the source code.
 7. The server and the ErrorSimulator will shutdown after 100s of inactivity.
 
 ### Included  Images
+1. UML class diagram
 
 No tests were created.

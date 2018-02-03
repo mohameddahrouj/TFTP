@@ -34,8 +34,8 @@ public class Client {
 			
 			//Initialize address
 			address = InetAddress.getLocalHost();
-			this.fileName = "Client.txt";
-			this.request = getRequestType();
+            this.request = getRequestType();
+			this.fileName = getFilePath();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -45,7 +45,6 @@ public class Client {
 	
 	/**
 	 * Read request format as per specification
-	 * @throws IOException
 	 */
 	private byte[] createRequest(){
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -89,31 +88,31 @@ public class Client {
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
-			ReadHandler readHandler = new ReadHandler(this.socket, address, Resources.clientPort, "./src/cis/client.txt");
+			ReadHandler readHandler = new ReadHandler(this.socket, address, Resources.clientPort, "temp.txt");
 			readHandler.process();
 
 
 		} else if (this.request == Request.WRITE) {
 
-			WriteHandler writeHandler = new WriteHandler(this.socket, address, Resources.clientPort,"./src/cis/client.txt");
+			WriteHandler writeHandler = new WriteHandler(this.socket, address, Resources.clientPort,"temp.txt");
 			writeHandler.waitForACK();
 			writeHandler.process();
 		}
 	}
 
 	/**
-	 * Prompts the user for the name of the file it wants to read/write to
-	 * @return the name of the file
+	 * Prompts the user for the path of the file it wants to read/write to
+	 * @return the path of the file
 	 */
-	private String getFilename() {
+	private String getFilePath() {
 		String path = "";
-		System.out.println("Please Enter file name: ");
+		System.out.println("Please Enter file path: ");
 
 		while (path.isEmpty()) {
 			Scanner scanner = new Scanner(System.in);
 			path = scanner.nextLine();
 			if (path.isEmpty())
-				System.out.print("Not a valid file name. Please renter file name");
+				System.out.print("Not a valid file path. Please renter file path");
 		}
 
 		return path;
@@ -148,7 +147,6 @@ public class Client {
 	/**
 	 * Execute the client to send and receive requests to the port
 	 * @param args Arguments
-	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) {
 		Client client = new Client();

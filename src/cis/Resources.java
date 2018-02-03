@@ -135,6 +135,13 @@ public class Resources {
 		else if(packet.getData()[1] == (byte) 0x02) {
 			return Request.WRITE;
 		}
+		else if(packet.getData()[1] == (byte) 0x03) {
+			return Request.DATA;
+		}
+		else if(packet.getData()[1] == (byte) 0x04) {
+			return Request.ACK;
+		}
+
 		return Request.INVALID;
 	}
 }

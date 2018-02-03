@@ -76,8 +76,8 @@ public class Server {
             Resources.printPacketInformation(receivedPacket);
             Request requestType = packetRequestType(receivedPacket);
             //create thread to handle response
-
-            Thread serverSendingThread = new Thread(new ServerResponse(receivedPacket, requestType));
+			String file = getFile(receivedPacket);
+            Thread serverSendingThread = new Thread(new ServerResponse(receivedPacket, requestType,file));
             serverSendingThread.start();
         }
         catch (Exception e)
@@ -87,6 +87,25 @@ public class Server {
             System.exit(1);
         }
 	}
+
+	/**
+	 * Gets the path of the file from the packet
+	 * @param packet the packet received from the Client
+	 * @return the path of the file
+	 */
+	private String getFile(DatagramPacket packet) {
+
+		byte[] data = packet.getData();
+		int index = 2;
+
+		while(data[index] != 0)
+		{
+			index++;
+		}
+
+		return new String(data,2,index-2);
+	}
+
 
 	/**
 	 * Determine if packet is a read or write request

@@ -20,7 +20,7 @@ public class ServerResponse  implements Runnable{
     private Handler handler;
 
 
-    public ServerResponse(DatagramPacket receivedPacket, Request request){
+    public ServerResponse(DatagramPacket receivedPacket, Request request, String filePath){
         try {
             this.receivedPacket = receivedPacket;
             this.request = request;
@@ -32,7 +32,7 @@ public class ServerResponse  implements Runnable{
                         sendingSocket,
                         receivedPacket.getAddress(),
                         receivedPacket.getPort(),
-                        "./src/cis/server.txt");
+                        filePath);
             }
             else
             {
@@ -41,7 +41,7 @@ public class ServerResponse  implements Runnable{
                         sendingSocket,
                         receivedPacket.getAddress(),
                         receivedPacket.getPort(),
-                        "./src/cis/server.txt");
+                        filePath);
             }
 
         }

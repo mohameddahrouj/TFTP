@@ -72,9 +72,14 @@ public class ErrorSimulator {
 
 	private int getServerPort(DatagramPacket packet) {
 
+		Request request = Resources.packetRequestType(packet);
 		int clientPort = packet.getPort();
-		if (connections.containsKey(clientPort)) {
-			return connections.get(clientPort);
+
+		// if the packet is an ACK/DATA packet then find the port
+		if(request == Request.ACK || request == Request.DATA) {
+			if (connections.containsKey(clientPort)) {
+				return connections.get(clientPort);
+			}
 		}
 
 		connections.put(clientPort, -1);
@@ -92,6 +97,7 @@ public class ErrorSimulator {
 		System.out.println("Error Simulator: Packet received from server:");
 		Resources.printPacketInformation(receivedServerPacket);
 
+		// save the port the server port
 		this.connections.put(clientPort,receivedServerPacket.getPort());
 
 		//Create new packet to send to client

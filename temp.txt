@@ -1,0 +1,100 @@
+import java.io.*;
+import java.net.*;
+
+public class Client {
+
+    DatagramSocket sendReceiveSocket;
+
+    private byte[] readRequest;
+    private byte[] writeRequest;
+    private byte[] errorRequest = new byte[] {3,2,3,4,2};
+
+    private static  String file = "test.txt";
+    private static String mode = "netascii";
+    private static int sendPort = 23;
+
+    private static int readRequests = 5;
+    private static int writeRequests = 5;
+
+    public Client()
+    {
+        try {
+            sendReceiveSocket = new DatagramSocket();
+            sendReceiveSocket.setSoTimeout(NetworkUtil.timeout);
+            readRequest = createRequest(NetworkUtil.RequestType.READ);
+            writeRequest = createRequest(NetworkUtil.RequestType.WRITE);
+        } catch (SocketException se) {
+            se.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    private byte[] createRequest(NetworkUtil.RequestType requestType)
+    {
+        try {
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            outputStream.write(0);
+
+            if(requestType == NetworkUtil.RequestType.READ)
+                outputStream.write(1);
+            else
+                outputStream.write(2);
+
+            outputStream.write(file.getBytes());
+            outputStream.write(0);
+            outputStream.write(mode.getBytes());
+            outputStream.write(0);
+            return outputStream.toByteArray();
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+
+        return new byte[] {};
+    }
+
+    private void sendAndReceive(byte[] request)
+    {
+        NetworkUtil.sendPacket(sendReceiveSocket, request, sendPort);
+        try
+        {
+            DatagramPacket packet = NetworkUtil.receivePacket(sendReceiveSocket,NetworkUtil.responseLength);
+            Thread.sleep(2000);
+        }
+        catch (SocketTimeoutException e)
+        {
+            System.out.println("Timeout occurred. Closing Sockets");
+            this.sendReceiveSocket.close();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    public void run()
+    {
+        for(int i =0; i<readRequests; i++)
+        {
+            this.sendAndReceive(readRequest);
+        }
+
+        for(int i =0; i<writeRequests; i++)
+        {
+            this.sendAndReceive(writeRequest);
+        }
+
+        this.sendAndReceive(errorRequest);
+
+        this.sendReceiveSocket.close();
+    }
+
+    public static void main(String args[])
+    {
+        Client client = new Client();
+        client.run();
+    }
+}

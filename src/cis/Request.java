@@ -5,6 +5,8 @@ public enum Request {
 
     READ("R"),
     WRITE("W"),
+    ACK("A"),
+    DATA("D"),
     INVALID("I");
 
     private String type;

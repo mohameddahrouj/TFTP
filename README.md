@@ -1,13 +1,13 @@
 # TFTP
 SYSC 3303 Project - Trivial File Transfer Protocol System
 
-| Name              | Student Number |
-|-------------------|----------------|
-| Ali Farah         | 100937214      |
-| Lava Tahir        | 100933449      |
-| Mohamed Dahrouj   | 100951843      |
-| Tosin Oni         | 100961759      |
-| Vanja Veselinovic | 100946517      |
+| Name              | Student Number | Responsibilites   |
+|-------------------|----------------|-------------------|
+| Ali Farah         | 100937214      | Code				 |
+| Lava Tahir        | 100933449      | Code				 |
+| Mohamed Dahrouj   | 100951843      | Code				 |
+| Tosin Oni         | 100961759      | Code				 |
+| Vanja Veselinovic | 100946517      | Code and diagrams |
 
 
 | Deliverable   | Due Date    |

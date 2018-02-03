@@ -16,7 +16,7 @@ public class Resources {
 	//Shared port between client and intermediate host
 	public static final int clientPort = 23;
 	
-	//Shared port between client and intermediate host
+	//Shared port between intermediate host and server
 	public static final int serverPort = 69;
 
 	public static final int timeout = 100000;

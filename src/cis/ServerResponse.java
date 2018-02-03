@@ -1,20 +1,16 @@
 package cis;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 
-/*
-*  ServerResponse is the class the server uses to send a response. It is a thread, so the
-*  server will create multiple server responses to handle the incoming requests.
-*  Last edited January 30th, 2018
-*  @author Mohamed Dahrouj, Lava Tahir
-* **/
-
+/**
+ * ServerResponse is the class the server uses to send a response. It is a thread, so the
+ * server will create multiple server responses to handle the incoming requests.
+ * Last edited January 30th, 2018
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
+ *
+ */
 public class ServerResponse  implements Runnable{
-    private DatagramPacket receivedPacket;
     private DatagramSocket sendingSocket;
     private Request request;
     private Handler handler;
@@ -22,7 +18,6 @@ public class ServerResponse  implements Runnable{
 
     public ServerResponse(DatagramPacket receivedPacket, Request request, String filePath){
         try {
-            this.receivedPacket = receivedPacket;
             this.request = request;
             this.sendingSocket = new DatagramSocket();
             if(request == Request.READ)

@@ -3,6 +3,11 @@ package cis;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+/**
+ * Base class of the WriteHandler and ReadHandler
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
+ *
+ */
 public abstract class Handler {
 
     protected DatagramSocket sendAndReceiveSocket;
@@ -15,7 +20,7 @@ public abstract class Handler {
 
     public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port, String file)
     {
-        // initialize variables
+        //Initialize variables
         this.sendAndReceiveSocket = sendAndReceiveSocket;
         this.prefix = prefix;
         this.address = address;
@@ -26,7 +31,7 @@ public abstract class Handler {
     /**
      * Creates the beginning of the ACK and Data packet
      * @param blockNumber
-     * @return
+     * @return ack in byte array form
      */
     protected byte[] getPrefix(int blockNumber) {
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * This class will receive data from a file and write it to a local file.
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  */
 public class ReadHandler extends Handler {
 

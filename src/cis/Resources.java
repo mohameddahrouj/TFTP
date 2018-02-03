@@ -9,7 +9,7 @@ import java.util.Formatter;
 /**
  * Common class between Client, ErrorSimulator and Server to print, send and receive packets
  * Last edited January 30th, 2018
- * @author Mohamed Dahrouj, Lava Tahir
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
 public class Resources {
@@ -19,6 +19,7 @@ public class Resources {
 	//Shared port between client and intermediate host
 	public static final int serverPort = 69;
 
+	//10s timeout
 	public static final int timeout = 100000;
 
 	/**

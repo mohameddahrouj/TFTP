@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Error Simulator is the intermediary between client and server
  * Last edited January 30th, 2018
- * @author Mohamed Dahrouj, Lava Tahir
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
 public class ErrorSimulator {
@@ -44,7 +44,7 @@ public class ErrorSimulator {
 	}
 
 	/**
-	 * forward the client packet to the server
+	 * Forward the client packet to the server
 	 */
 	private int forwardClientPacket()
 	{
@@ -70,6 +70,9 @@ public class ErrorSimulator {
 		return receivedPacket.getPort();
 	}
 
+	/**
+	 * Get server port number based on request type
+	 */
 	private int getServerPort(DatagramPacket packet) {
 
 		Request request = Resources.packetRequestType(packet);
@@ -87,7 +90,7 @@ public class ErrorSimulator {
 	}
 
 	/**
-	 * forward the client packet to the server
+	 * Forward the client packet to the server
 	 */
 	private void forwardServerPacket(int clientPort)
 	{

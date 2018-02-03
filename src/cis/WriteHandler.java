@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 /**
  * This class will send the contents of a file to the receiver.
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
+ *
  */
 public class WriteHandler extends Handler {
 

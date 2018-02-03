@@ -1,5 +1,10 @@
 package cis;
 
+/**
+ * Enumerated class that defines different request types
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
+ *
+ */
 public enum Request {
 
 

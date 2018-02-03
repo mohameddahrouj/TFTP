@@ -10,7 +10,7 @@ import java.util.Scanner;
  * This class is the client side for a server based on UDP/IP.
  * The client communicates with the error simulator at the specified port.
  * Last edited January 30th, 2018
- * @author Mohamed Dahrouj, Lava Tahir
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
 public class Client {
@@ -113,6 +113,7 @@ public class Client {
 			path = scanner.nextLine();
 			if (path.isEmpty())
 				System.out.print("Not a valid file path. Please renter file path");
+			scanner.close();
 		}
 
 		return path;
@@ -131,14 +132,17 @@ public class Client {
 			String type = scanner.nextLine();
 			if(type.equals(Request.READ.getType()))
 			{
+				scanner.close();
 				return Request.READ;
 			}
 			else if(type.equals(Request.WRITE.getType()))
 			{
+				scanner.close();
 				return Request.WRITE;
 			}
 			else
 			{
+				scanner.close();
 				System.out.println("Not a valid request request.Type R for Read and W for Write");
 			}
 		}

@@ -40,6 +40,8 @@ There are 8 java files within the source code.
 7. The server and the ErrorSimulator will shutdown after 100s of inactivity.
 
 ### Included  Images
-1. UML class diagram
+1. UMLClassDiagram.png: Represents requirement #4 and shows all the classes and their dependencies
+2. UCMRead.png: UCM diagram of a read request
+3. UCMWrite.png: UCM diagram of a write request
 
 No tests were created.

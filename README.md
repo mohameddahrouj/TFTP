@@ -33,13 +33,12 @@ There are 8 java files within the source code.
 1. Start the Server (main)
 2. Start the Error Simulator (main)
 3. Start the Client (main)
-4. After starting the Client you will be prompted to enter the request type. Type R for a read request or W for a write request.
+4. After starting the Client you will be prompted to enter the request type. Type `R` for a read request or `W` for a write request.
 5. Then you will be prompted to enter the path of a file.
 6a. If you enter a read request then the contents of the file that you specified will be transferred to the temp.txt file. The temp.txt can be found in the same folder as the README.
 6b. If you enter a write request then the contents of the temp.txt will be transferred to the file that you specified.
 7. The server and the ErrorSimulator will shutdown after 100s of inactivity.
 
 ### Included  Images
-
 
 No tests were created.

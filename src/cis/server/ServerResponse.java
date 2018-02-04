@@ -1,7 +1,12 @@
-package cis;
+package cis.server;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+
+import cis.handlers.Handler;
+import cis.handlers.ReadHandler;
+import cis.handlers.WriteHandler;
+import cis.utils.Request;
 
 /**
  * ServerResponse is the class the server uses to send a response. It is a thread, so the

@@ -1,10 +1,12 @@
-package cis;
+package cis.handlers;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
+
+import cis.utils.Resources;
 
 /**
  * This class will send the contents of a file to the receiver.

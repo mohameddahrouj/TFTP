@@ -1,4 +1,4 @@
-package cis;
+package cis.handlers;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;

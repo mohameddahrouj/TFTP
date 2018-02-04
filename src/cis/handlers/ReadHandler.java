@@ -1,4 +1,4 @@
-package cis;
+package cis.handlers;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,6 +7,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+
+import cis.utils.Resources;
 
 /**
  * This class will receive data from a file and write it to a local file.

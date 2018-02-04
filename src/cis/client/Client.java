@@ -1,10 +1,15 @@
-package cis;
+package cis.client;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
+
+import cis.handlers.ReadHandler;
+import cis.handlers.WriteHandler;
+import cis.utils.Request;
+import cis.utils.Resources;
 
 /**
  * This class is the client side for a server based on UDP/IP.
@@ -108,13 +113,14 @@ public class Client {
 		String path = "";
 		System.out.println("Please Enter file path: ");
 
+		Scanner scanner = new Scanner(System.in);
 		while (path.isEmpty()) {
-			Scanner scanner = new Scanner(System.in);
 			path = scanner.nextLine();
 			if (path.isEmpty())
 				System.out.print("Not a valid file path. Please renter file path");
 		}
 
+		scanner.close();
 		return path;
 	}
 
@@ -125,23 +131,32 @@ public class Client {
 	private Request getRequestType()
 	{
 		System.out.println("Please Enter Request request. R for Read and W for Write: ");
-		while(true)
+		Scanner scanner = new Scanner(System.in);
+
+		boolean isRequestObtained = true;
+		Request selectedRequest = null;
+		
+		while(isRequestObtained)
 		{
-			Scanner scanner = new Scanner(System.in);
-			String type = scanner.nextLine();
+			String type = scanner.nextLine().toUpperCase();
 			if(type.equals(Request.READ.getType()))
 			{
-				return Request.READ;
+				selectedRequest = Request.READ;
+				isRequestObtained = false;
 			}
 			else if(type.equals(Request.WRITE.getType()))
 			{
-				return Request.WRITE;
+				selectedRequest = Request.WRITE;
+				isRequestObtained = false;
 			}
 			else
 			{
 				System.out.println("Not a valid request request.Type R for Read and W for Write");
 			}
 		}
+		
+		scanner.close();
+		return selectedRequest;
 	}
 
 	/**

@@ -12,23 +12,28 @@ SYSC 3303 Project - Trivial File Transfer Protocol System
 
 ### File Structure
 There are 5 folders within the source code.
-Install Yeoman:
 
 Client:
-	 Client.java : Represents the client class which interacts with the system.
+
+    Client.java : Represents the client class which interacts with the system
+
 
 Host:
+	 
 	 ErrorSimulator.java : Represents the intermediate host which interacts between client and server and simulates errors.
 
 Server:
+	 
 	 Server.java : Represents the server which sends and receives to the intermediate host.
 
 Handlers:
+	 
 	 Handler.java: Is the base class of the WriteHandler and ReadHandler.
 	 WriteHandler.java: This class will send the contents of a file to the receiver.
 	 ReadHandler.java: This class will receive data from a file and write it to a local file.
 
 Utils:
+	 
 	 Request.java: Is an enumerated class that represents the request types of the packets in the simulation
 	 Resources.java : Is a common class that is used by all the Client, ErrorSimulator and Server to print, send and receive packets.
 

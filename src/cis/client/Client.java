@@ -25,8 +25,9 @@ public class Client {
 	private byte[] mode;
 	private String fileName;
 	private Request request;
-
+	
 	private InetAddress address;
+	private Scanner inputScanner;
 	
 	public Client() {
 		try {
@@ -34,6 +35,7 @@ public class Client {
 	        // port on the local host machine. This socket will be used to
 	        // send and receive UDP Datagram packets.
 			socket = new DatagramSocket();
+			inputScanner = new Scanner(System.in);
 			//Initialize octet bytes
 			mode = octet.getBytes();
 			
@@ -41,6 +43,7 @@ public class Client {
 			address = InetAddress.getLocalHost();
             this.request = getRequestType();
 			this.fileName = getFilePath();
+			inputScanner.close();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -113,14 +116,12 @@ public class Client {
 		String path = "";
 		System.out.println("Please Enter file path: ");
 
-		Scanner scanner = new Scanner(System.in);
 		while (path.isEmpty()) {
-			path = scanner.nextLine();
+			path = inputScanner.nextLine();
 			if (path.isEmpty())
-				System.out.print("Not a valid file path. Please renter file path");
+				System.out.print("Not a valid file path. Please renter file path: ");
 		}
 
-		scanner.close();
 		return path;
 	}
 
@@ -131,32 +132,24 @@ public class Client {
 	private Request getRequestType()
 	{
 		System.out.println("Please Enter Request request. R for Read and W for Write: ");
-		Scanner scanner = new Scanner(System.in);
-
-		boolean isRequestObtained = true;
-		Request selectedRequest = null;
 		
-		while(isRequestObtained)
+		while(true)
 		{
-			String type = scanner.nextLine().toUpperCase();
+			String type = inputScanner.nextLine().toUpperCase();
 			if(type.equals(Request.READ.getType()))
 			{
-				selectedRequest = Request.READ;
-				isRequestObtained = false;
+				return Request.READ;
 			}
 			else if(type.equals(Request.WRITE.getType()))
 			{
-				selectedRequest = Request.WRITE;
-				isRequestObtained = false;
+				return Request.WRITE;
 			}
 			else
 			{
 				System.out.println("Not a valid request request.Type R for Read and W for Write");
 			}
-		}
-		
-		scanner.close();
-		return selectedRequest;
+			
+		}		
 	}
 
 	/**

@@ -1,10 +1,13 @@
-package cis;
+package cis.host;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
+
+import cis.utils.Request;
+import cis.utils.Resources;
 
 /**
  * Error Simulator is the intermediary between client and server

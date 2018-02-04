@@ -1,4 +1,4 @@
-package cis;
+package cis.utils;
 
 /**
  * Enumerated class that defines different request types

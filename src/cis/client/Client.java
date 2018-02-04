@@ -1,10 +1,15 @@
-package cis;
+package cis.client;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
+
+import cis.handlers.ReadHandler;
+import cis.handlers.WriteHandler;
+import cis.utils.Request;
+import cis.utils.Resources;
 
 /**
  * This class is the client side for a server based on UDP/IP.
@@ -20,8 +25,9 @@ public class Client {
 	private byte[] mode;
 	private String fileName;
 	private Request request;
-
+	
 	private InetAddress address;
+	private Scanner inputScanner;
 	
 	public Client() {
 		try {
@@ -29,6 +35,7 @@ public class Client {
 	        // port on the local host machine. This socket will be used to
 	        // send and receive UDP Datagram packets.
 			socket = new DatagramSocket();
+			inputScanner = new Scanner(System.in);
 			//Initialize octet bytes
 			mode = octet.getBytes();
 			
@@ -36,6 +43,7 @@ public class Client {
 			address = InetAddress.getLocalHost();
             this.request = getRequestType();
 			this.fileName = getFilePath();
+			inputScanner.close();
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -109,10 +117,9 @@ public class Client {
 		System.out.println("Please Enter file path: ");
 
 		while (path.isEmpty()) {
-			Scanner scanner = new Scanner(System.in);
-			path = scanner.nextLine();
+			path = inputScanner.nextLine();
 			if (path.isEmpty())
-				System.out.print("Not a valid file path. Please renter file path");
+				System.out.print("Not a valid file path. Please renter file path: ");
 		}
 
 		return path;
@@ -125,10 +132,10 @@ public class Client {
 	private Request getRequestType()
 	{
 		System.out.println("Please Enter Request request. R for Read and W for Write: ");
+		
 		while(true)
 		{
-			Scanner scanner = new Scanner(System.in);
-			String type = scanner.nextLine();
+			String type = inputScanner.nextLine().toUpperCase();
 			if(type.equals(Request.READ.getType()))
 			{
 				return Request.READ;
@@ -141,7 +148,8 @@ public class Client {
 			{
 				System.out.println("Not a valid request request.Type R for Read and W for Write");
 			}
-		}
+			
+		}		
 	}
 
 	/**

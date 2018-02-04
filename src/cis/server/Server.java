@@ -1,8 +1,11 @@
-package cis;
+package cis.server;
 
 import java.io.ByteArrayOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+
+import cis.utils.Request;
+import cis.utils.Resources;
 
 /**
  * Server communicates with the error simulator

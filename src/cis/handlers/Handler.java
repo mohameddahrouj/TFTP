@@ -1,10 +1,15 @@
 package cis.handlers;
 
+import java.io.File;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import cis.utils.IOErrorType;
+import cis.utils.Resources;
+
 /**
- * Base class of the WriteHandler and ReadHandler
+ * Base class of the SenderHandler and ReceiverHandler
  * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
@@ -15,17 +20,16 @@ public abstract class Handler {
     protected byte prefix;
     protected InetAddress address;
     protected int port;
-    protected String file;
+    protected String filePath;
 
-
-    public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port, String file)
+    public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port, String filePath)
     {
         //Initialize variables
         this.sendAndReceiveSocket = sendAndReceiveSocket;
         this.prefix = prefix;
         this.address = address;
         this.port = port;
-        this.file = file;
+        this.filePath = filePath;
     }
 
     /**
@@ -41,6 +45,20 @@ public abstract class Handler {
         ack[2] = (byte) ( (blockNumber >> 7) & 0xFF);
         ack[3] = (byte) ( (blockNumber) & 0xFF);
         return ack;
+    }
+    
+    protected boolean doesFileExist()
+    {
+    	File file = new File(this.filePath);
+    	
+    	return file.exists() && !file.isDirectory();
+    }
+    
+    protected void sendErrorPacket(IOErrorType errorType)
+    {
+    	byte[] data = errorType.createErrorPacketData();
+    	DatagramPacket packet = new DatagramPacket(data, data.length,address,port);
+    	Resources.sendPacket(packet, sendAndReceiveSocket);
     }
 
     public abstract void process();

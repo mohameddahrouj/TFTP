@@ -6,8 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
 
-import cis.handlers.ReadHandler;
-import cis.handlers.WriteHandler;
+import cis.handlers.ReceiverHandler;
+import cis.handlers.SenderHandler;
 import cis.utils.Request;
 import cis.utils.Resources;
 
@@ -96,15 +96,15 @@ public class Client {
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
-			ReadHandler readHandler = new ReadHandler(this.socket, address, Resources.clientPort, "temp.txt");
-			readHandler.process();
+			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.clientPort, "temp.txt", "Client");
+			receiverHandler.process();
 
 
 		} else if (this.request == Request.WRITE) {
 
-			WriteHandler writeHandler = new WriteHandler(this.socket, address, Resources.clientPort,"temp.txt");
-			writeHandler.waitForACK();
-			writeHandler.process();
+			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.clientPort,"temp.txt");
+			senderHandler.waitForACK();
+			senderHandler.process();
 		}
 	}
 

@@ -8,7 +8,20 @@ import cis.utils.Request;
 import cis.utils.Resources;
 
 /**
- * Server communicates with the error simulator
+ * Server communicates with the error simulator.
+ * 
+ * If read request, server will check if specified file name exists on the server side.
+ * If yes, then the server will create then write to the same file name on the client side.
+ * If no, file not found error packet will be sent.
+ * If the file name already exists on the client side, file already exists error packet will be sent.
+ * 
+ * 
+ * If write request, server will check if specified file name exists on the client side.
+ * If yes, then the server will create then write to the same file name on the server side.
+ * If no, then file not found error will be sent.
+ * If the file name already exists on the server side, file already exists error packet will be sent.
+ * If the file name has read only on server side, access violation packet will be sent.
+ * 
  * Last edited January 30th, 2018
  * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *

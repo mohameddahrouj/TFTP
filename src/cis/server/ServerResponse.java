@@ -4,8 +4,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 import cis.handlers.Handler;
-import cis.handlers.ReadHandler;
-import cis.handlers.WriteHandler;
+import cis.handlers.ReceiverHandler;
+import cis.handlers.SenderHandler;
 import cis.utils.Request;
 
 /**
@@ -17,18 +17,16 @@ import cis.utils.Request;
  */
 public class ServerResponse  implements Runnable{
     private DatagramSocket sendingSocket;
-    private Request request;
     private Handler handler;
 
 
     public ServerResponse(DatagramPacket receivedPacket, Request request, String filePath){
         try {
-            this.request = request;
             this.sendingSocket = new DatagramSocket();
             if(request == Request.READ)
             {
                 // if the request is a read then you will be sending data from a file to the client.
-                this.handler = new WriteHandler(
+                this.handler = new SenderHandler(
                         sendingSocket,
                         receivedPacket.getAddress(),
                         receivedPacket.getPort(),
@@ -37,11 +35,14 @@ public class ServerResponse  implements Runnable{
             else
             {
                 // if the request is a write then you will be receiving data from a file.
-                this.handler = new ReadHandler(
+                this.handler = new ReceiverHandler(
                         sendingSocket,
                         receivedPacket.getAddress(),
                         receivedPacket.getPort(),
-                        filePath);
+                        filePath,
+                        "Server");
+                //Send the ack initially
+                ((ReceiverHandler)handler).sendAck(0);
             }
 
         }
@@ -58,13 +59,7 @@ public class ServerResponse  implements Runnable{
     @Override
     public void run(){
         try {
-
-            if(this.request == Request.WRITE)
-            {
-                // if the request is a write then send an ack before waiting to Receive data.
-                ReadHandler readHandler = (ReadHandler)handler;
-                readHandler.sendAck(0);
-            }
+        	
             handler.process();
             this.sendingSocket.close();
 

@@ -1,28 +1,36 @@
 package cis.handlers;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import cis.utils.IOErrorType;
 import cis.utils.Resources;
 
 /**
  * This class will receive data from a file and write it to a local file.
  * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  */
-public class ReadHandler extends Handler {
+public class ReceiverHandler extends Handler {
 
     private static final byte prefixNumber = 4;
     private List<Byte> buffer;
     private final static int maxBlockLength = 516;
+    private FileOutputStream fileStream;
 
-    public ReadHandler(DatagramSocket socket,InetAddress address, int port, String file)
+    public ReceiverHandler(DatagramSocket socket,InetAddress address, int port, String fileName, String directory)
     {
-        super(socket,prefixNumber, address, port, file);
+        super(socket,prefixNumber, address, port, fileName);
+        this.fileStream = this.createFile(directory);
         this.buffer = new ArrayList<>();
     }
 
@@ -41,11 +49,15 @@ public class ReadHandler extends Handler {
             sendAck(getBlockNumber(receivedPacket.getData()));
 
             bufferData(receivedPacket);
-
+            writeToFile();
             isFinalPacket = isFinalPacket(receivedPacket);
         }
 
-        writeToFile();
+        try {
+			this.fileStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     public void sendAck(int blockNumber)
@@ -56,6 +68,30 @@ public class ReadHandler extends Handler {
         Resources.printPacketInformation(packet);
         Resources.sendPacket(packet, this.sendAndReceiveSocket);
         System.out.println("Ack sent\n");
+    }
+    
+    private FileOutputStream createFile(String directory)
+    {
+    	try
+    	{
+    		Path path = Paths.get(this.filePath);
+    		Path filePath = Files.createFile(Paths.get("./" + directory +"/" +path.getFileName()));
+	    	File file = new File(filePath.toString());
+    		return new FileOutputStream(file);
+    	}
+    	catch(FileAlreadyExistsException  e)
+    	{
+    		super.sendErrorPacket(IOErrorType.FileExists);
+    		//e.printStackTrace();
+    		System.exit(1);
+    	}
+    	catch(IOException e)
+    	{
+    		super.sendErrorPacket(IOErrorType.FileExists);
+    		e.printStackTrace();
+    		System.exit(1);
+    	}
+    	return null;
     }
 
     private int getBlockNumber(byte[] data)
@@ -81,9 +117,8 @@ public class ReadHandler extends Handler {
     private void writeToFile()
     {
         try {
-            FileOutputStream stream = new FileOutputStream(this.file);
-            stream.write(getData());
-            stream.close();
+            fileStream.write(getData());
+            this.buffer.clear();
         }
         catch (IOException exception)
         {

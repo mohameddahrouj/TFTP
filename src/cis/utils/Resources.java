@@ -142,7 +142,9 @@ public class Resources {
 		else if(packet.getData()[1] == (byte) 0x04) {
 			return Request.ACK;
 		}
-
+		else if(packet.getData()[1] == (byte) 0x05) {
+			return Request.ERROR;
+		}
 		return Request.INVALID;
 	}
 }

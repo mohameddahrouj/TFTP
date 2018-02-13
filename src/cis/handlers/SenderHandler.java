@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 
+import cis.utils.IOErrorType;
 import cis.utils.Resources;
 
 /**
@@ -13,7 +14,7 @@ import cis.utils.Resources;
  * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
-public class WriteHandler extends Handler {
+public class SenderHandler extends Handler {
 
     private static final byte prefixNumber = 3;
     private static final int maxBlockSize = 512;
@@ -21,11 +22,11 @@ public class WriteHandler extends Handler {
     private int blockNumber;
     private byte[] fileData;
 
-    public WriteHandler(DatagramSocket socket,InetAddress address, int port, String file)
+    public SenderHandler(DatagramSocket socket,InetAddress address, int port, String file)
     {
         super(socket,prefixNumber, address, port,file);
         this.blockNumber = 0;
-        this.fileData = readFileAndConvertToByteArray(this.file);
+        this.fileData = readFileAndConvertToByteArray(this.filePath);
     }
 
     /**
@@ -40,11 +41,18 @@ public class WriteHandler extends Handler {
     public void process() {
         boolean isFinalPacket = false;
 
-        while(!isFinalPacket) {
-            this.sendData();
-            this.blockNumber++; // increase the blockNumber after each write
-            this.waitForACK();
-            isFinalPacket =  isFinalPacket();
+        if(!doesFileExist())
+        {
+        	this.sendErrorPacket(IOErrorType.FileNotFound);
+        }
+        else
+        {
+	        while(!isFinalPacket) {
+	            this.sendData();
+	            this.blockNumber++; // increase the blockNumber after each write
+	            this.waitForACK();
+	            isFinalPacket =  isFinalPacket();
+	        }
         }
     }
 

@@ -79,6 +79,7 @@ public class Client {
 	 */
 	private void sendRequest()
 	{
+		// before sending request check if the file is valid
 		if(!this.isFileValid())
 			return;
 		
@@ -129,6 +130,11 @@ public class Client {
 		return path;
 	}
 	
+	/**
+	 * Checks if the file is valid
+	 * @return returns false if the request is a read and the file exists.
+	 *  Returns false if the request is a write and the file does not exist.
+	 */
 	private boolean isFileValid()
 	{
 		if(request == Request.READ)

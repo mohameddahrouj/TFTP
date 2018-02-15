@@ -19,7 +19,6 @@ public class ServerResponse  implements Runnable{
     private DatagramSocket sendingSocket;
     private Handler handler;
 
-
     public ServerResponse(DatagramPacket receivedPacket, Request request, String filePath){
         try {
             this.sendingSocket = new DatagramSocket();

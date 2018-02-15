@@ -46,7 +46,11 @@ public abstract class Handler {
         ack[3] = (byte) ( (blockNumber) & 0xFF);
         return ack;
     }
-        
+     
+    /**
+     * sends the error packet associated with the error
+     * @param errorType
+     */
     protected void sendErrorPacket(IOErrorType errorType)
     {
     	byte[] data = errorType.createErrorPacketData();

@@ -93,8 +93,8 @@ public class ReceiverHandler extends Handler {
     		else
     		{
     			// file already exists send error packet and return 
+        		System.out.println(newFilePath + " already exists! Sending File exists packet.");
         		super.sendErrorPacket(IOErrorType.FileExists);
-        		System.out.println(newFilePath + " already exists!");
         		System.exit(1);
     		}
     	}

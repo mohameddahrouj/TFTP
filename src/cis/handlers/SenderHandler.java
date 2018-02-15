@@ -97,14 +97,14 @@ public class SenderHandler extends Handler {
         }
         catch(FileNotFoundException ex) {
             System.out.println(
-                    "Could not find " + filename +" Sending Error Packet.");
+                    "Could not find " + filename +" Sending file not found error packet.");
         	this.sendErrorPacket(IOErrorType.FileNotFound);
             System.exit(1);
 
         }
         catch(SecurityException ex)
         {
-            System.out.println(filename +" Packet is readonly. Sending Error Packet.");
+            System.out.println(filename +" Packet is readonly. Sending access violation error packet.");
         	this.sendErrorPacket(IOErrorType.AccessViolation);
             System.exit(1);
         }

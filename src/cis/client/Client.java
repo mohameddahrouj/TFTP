@@ -79,10 +79,6 @@ public class Client {
 	 */
 	private void sendRequest()
 	{
-		// before sending request check if the file is valid
-		if(!this.isFileValid())
-			return;
-		
 		byte[] request = createRequest();
 
 		//Send the packet given request, address and port
@@ -98,6 +94,10 @@ public class Client {
 	 */
 	public void processRequest() {
 
+		// before sending request check if the file is valid
+		if(!this.isFileValid())
+			return;
+		
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
@@ -179,8 +179,7 @@ public class Client {
 			else
 			{
 				System.out.println("Not a valid request request.Type R for Read and W for Write");
-			}
-			
+			}		
 		}		
 	}
 
@@ -190,7 +189,7 @@ public class Client {
 	 */
 	public static void main(String[] args) {
 		Client client = new Client();
-		client.processRequest();
+		client.processRequest();	
 	}
 
 }

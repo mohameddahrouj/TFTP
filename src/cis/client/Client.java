@@ -21,9 +21,10 @@ import cis.utils.Resources;
 public class Client {
 	private DatagramSocket socket;
 
-	private final String octet = "ocTEt";
+	private final String octet = "octet";
+	private final String directory = "Client";
 	private byte[] mode;
-	private String fileName;
+	private String filePath;
 	private Request request;
 	
 	private InetAddress address;
@@ -42,7 +43,7 @@ public class Client {
 			//Initialize address
 			address = InetAddress.getLocalHost();
             this.request = getRequestType();
-			this.fileName = getFilePath();
+			this.filePath = getFilePath();
 			inputScanner.close();
 		}
 		catch(Exception e) {
@@ -59,7 +60,7 @@ public class Client {
 
 		try {
 			byteArrayOutputStream.write(this.request.getBytes());
-			byteArrayOutputStream.write(this.fileName.getBytes());
+			byteArrayOutputStream.write(this.filePath.getBytes());
 			byteArrayOutputStream.write(0);
 			byteArrayOutputStream.write(mode);
 			byteArrayOutputStream.write(0);
@@ -78,6 +79,9 @@ public class Client {
 	 */
 	private void sendRequest()
 	{
+		if(!this.isFileValid())
+			return;
+		
 		byte[] request = createRequest();
 
 		//Send the packet given request, address and port
@@ -96,13 +100,13 @@ public class Client {
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
-			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.clientPort, "temp.txt", "Client");
+			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.clientPort, this.filePath, this.directory);
 			receiverHandler.process();
 
 
 		} else if (this.request == Request.WRITE) {
 
-			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.clientPort,"temp.txt");
+			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.clientPort,this.filePath);
 			senderHandler.waitForACK();
 			senderHandler.process();
 		}
@@ -123,6 +127,28 @@ public class Client {
 		}
 
 		return path;
+	}
+	
+	private boolean isFileValid()
+	{
+		if(request == Request.READ)
+		{
+			String fileName = new File(this.filePath).getName();
+			if(Resources.doesFileExist("./" + this.directory + "/" + fileName))
+			{
+				System.out.println("The file already exists on the client side.");
+				return false;
+			}
+		}
+		else if (request == Request.WRITE)
+		{
+			if(!Resources.doesFileExist(this.filePath))
+			{
+				System.out.println("The file does not exist.");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

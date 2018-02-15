@@ -46,14 +46,7 @@ public abstract class Handler {
         ack[3] = (byte) ( (blockNumber) & 0xFF);
         return ack;
     }
-    
-    protected boolean doesFileExist()
-    {
-    	File file = new File(this.filePath);
-    	
-    	return file.exists() && !file.isDirectory();
-    }
-    
+        
     protected void sendErrorPacket(IOErrorType errorType)
     {
     	byte[] data = errorType.createErrorPacketData();

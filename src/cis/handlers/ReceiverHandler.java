@@ -3,6 +3,7 @@ package cis.handlers;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Authenticator.RequestorType;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cis.utils.IOErrorType;
+import cis.utils.Request;
 import cis.utils.Resources;
 
 /**
@@ -44,6 +46,12 @@ public class ReceiverHandler extends Handler {
             DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
             System.out.println("Data Received: ");
             Resources.printPacketInformation(receivedPacket);
+            
+            if(Resources.packetRequestType(receivedPacket) == Request.ERROR)
+            {
+            	System.out.println("Recieved an error from the sender. Exiting");
+            	System.exit(1);
+            }
 
             //send Ack for data received
             sendAck(getBlockNumber(receivedPacket.getData()));
@@ -72,22 +80,26 @@ public class ReceiverHandler extends Handler {
     
     private FileOutputStream createFile(String directory)
     {
+		String fileName = Paths.get(this.filePath).getFileName().toString();
+		String newFilePath = "./" + directory + "/" + fileName;
     	try
     	{
-    		Path path = Paths.get(this.filePath);
-    		Path filePath = Files.createFile(Paths.get("./" + directory +"/" +path.getFileName()));
-	    	File file = new File(filePath.toString());
-    		return new FileOutputStream(file);
-    	}
-    	catch(FileAlreadyExistsException  e)
-    	{
-    		super.sendErrorPacket(IOErrorType.FileExists);
-    		//e.printStackTrace();
-    		System.exit(1);
+    		File file = new File(newFilePath);
+    		file.getParentFile().mkdirs();
+    		if(file.createNewFile())
+    		{
+    			return new FileOutputStream(file);
+    		}
+    		else
+    		{
+    			// file already exists send error packet and return 
+        		super.sendErrorPacket(IOErrorType.FileExists);
+        		System.out.println(newFilePath + " already exists!");
+        		System.exit(1);
+    		}
     	}
     	catch(IOException e)
     	{
-    		super.sendErrorPacket(IOErrorType.FileExists);
     		e.printStackTrace();
     		System.exit(1);
     	}

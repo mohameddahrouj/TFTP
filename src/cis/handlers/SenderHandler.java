@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 
 import cis.utils.IOErrorType;
+import cis.utils.Request;
 import cis.utils.Resources;
 
 /**
@@ -41,19 +42,13 @@ public class SenderHandler extends Handler {
     public void process() {
         boolean isFinalPacket = false;
 
-        if(!doesFileExist())
-        {
-        	this.sendErrorPacket(IOErrorType.FileNotFound);
+        while(!isFinalPacket) {
+            this.sendData();
+            this.blockNumber++; // increase the blockNumber after each write
+            this.waitForACK();
+            isFinalPacket =  isFinalPacket();
         }
-        else
-        {
-	        while(!isFinalPacket) {
-	            this.sendData();
-	            this.blockNumber++; // increase the blockNumber after each write
-	            this.waitForACK();
-	            isFinalPacket =  isFinalPacket();
-	        }
-        }
+    
     }
 
     /**
@@ -78,6 +73,12 @@ public class SenderHandler extends Handler {
         DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
         System.out.println("ACK Received:");
         Resources.printPacketInformation(receivedPacket);
+        
+        if(Resources.packetRequestType(receivedPacket) == Request.ERROR)
+        {
+        	System.out.println("Recieved an error from the reciever. Exiting");
+        	System.exit(1);
+        }
     }
 
     /**
@@ -96,9 +97,16 @@ public class SenderHandler extends Handler {
         }
         catch(FileNotFoundException ex) {
             System.out.println(
-                    "No name found for '" + filename + "'");
+                    "Could not find " + filename +" Sending Error Packet.");
+        	this.sendErrorPacket(IOErrorType.FileNotFound);
             System.exit(1);
 
+        }
+        catch(SecurityException ex)
+        {
+            System.out.println(filename +" Packet is readonly. Sending Error Packet.");
+        	this.sendErrorPacket(IOErrorType.AccessViolation);
+            System.exit(1);
         }
         catch(IOException ex) {
             System.out.println(

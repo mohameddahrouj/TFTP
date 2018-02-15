@@ -1,5 +1,6 @@
 package cis.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -20,7 +21,7 @@ public class Resources {
 	public static final int serverPort = 69;
 
 	//10s timeout
-	public static final int timeout = 100000;
+	public static final int timeout = 300000;
 
 	/**
 	 * Print packet information as string or bytes
@@ -147,4 +148,11 @@ public class Resources {
 		}
 		return Request.INVALID;
 	}
+	
+    public static boolean doesFileExist(String filePath)
+    {
+    	File file = new File(filePath);
+    	
+    	return file.exists() && !file.isDirectory();
+    }
 }

@@ -49,9 +49,10 @@ Utils:
 7. The server and the ErrorSimulator will shutdown after 100s of inactivity.
 
 ### Included  Images
-1. UMLClassDiagram.png: Represents requirement #4 and shows all the classes and their dependencies
+1. UMLClassDiagram.png: UML class diagram that shows all the classes and their dependencies
 2. UCMRead.png: UCM diagram of a read request
 3. UCMWrite.png: UCM diagram of a write request
+4. Error timing diagrams.png: Timing diagrams for all error scenarios for iteration 2. There is no diagram for a write request FileNotFound error because a request is not sent in the first place if the file does not exist on the client side.
 
 
 | Deliverable   | Due Date    |

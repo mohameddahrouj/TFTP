@@ -44,8 +44,8 @@ Utils:
 3. Execute the Client.java in client folder (main)
 4. After starting the Client you will be prompted to enter the request type. Type `R` for a read request or `W` for a write request.
 5. Then you will be prompted to enter the path of a file.
-6a. If you enter a read request then the contents of the file that you specified will be transferred to the temp.txt file. The temp.txt can be found in the same folder as the README.
-6b. If you enter a write request then the contents of the temp.txt will be transferred to the file that you specified.
+6a. If you enter a read request then the contents of the file that you specified will be transferred to a file of the same name in the Client folder.
+6b. If you enter a write request then the contents of the file that you specified will be transferred to a file of the same name in the Server folder.
 7. The server and the ErrorSimulator will shutdown after 100s of inactivity.
 
 ### Included  Images

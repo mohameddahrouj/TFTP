@@ -135,6 +135,7 @@ public class ReceiverHandler extends Handler {
         catch (IOException exception)
         {
             System.out.println("Error copying data to file");
+        	super.sendErrorPacket(IOErrorType.DiskFull);
             exception.printStackTrace();
             System.exit(1);
         }

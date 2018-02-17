@@ -4,8 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * 
- * @author lavatahir
+ * Class that enumerates the different IO error types.
+ * Last edited February 17th, 2018
+ * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
 public enum IOErrorType {

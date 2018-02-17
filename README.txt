@@ -36,7 +36,7 @@ Utils:
 	 
 	 Request.java: Is an enumerated class that represents the request types of the packets in the simulation
 	 Resources.java : Is a common class that is used by all the Client, ErrorSimulator and Server to print, send and receive packets.
-
+	 IOErrorType.java : A class that enumerates the different IO error types.
 
 ### Set-up Instructions
 1. Execute the Server.java in server folder (main)

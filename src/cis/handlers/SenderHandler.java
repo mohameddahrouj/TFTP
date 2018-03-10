@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
 import cis.utils.IOErrorType;
@@ -12,149 +13,146 @@ import cis.utils.Resources;
 
 /**
  * This class will send the contents of a file to the receiver.
+ * 
  * @author Mohamed Dahrouj, Ali Farah, Lava Tahir, Tosin Oni, Vanja Veselinovic
  *
  */
 public class SenderHandler extends Handler {
 
-    private static final byte prefixNumber = 3;
-    private static final int maxBlockSize = 512;
+	private static final byte prefixNumber = 3;
+	private static final int maxBlockSize = 512;
 
-    private int blockNumber;
-    private byte[] fileData;
+	private int blockNumber;
+	private byte[] fileData;
 
-    public SenderHandler(DatagramSocket socket,InetAddress address, int port, String file)
-    {
-        super(socket,prefixNumber, address, port,file);
-        this.blockNumber = 0;
-        this.fileData = readFileAndConvertToByteArray(this.filePath);
-    }
+	public SenderHandler(DatagramSocket socket, InetAddress address, int port, String file, int requester) {
+		super(socket, prefixNumber, address, port, file, requester);
+		this.blockNumber = 0;
+		this.fileData = readFileAndConvertToByteArray(this.filePath);
+	}
 
-    /**
-     *
-     * @return return whether or not this is the final packet
-     */
-    private boolean isFinalPacket() {
-        return this.blockNumber * maxBlockSize > this.fileData.length;
-    }
+	/**
+	 *
+	 * @return return whether or not this is the final packet
+	 */
+	private boolean isFinalPacket() {
+		return this.blockNumber * maxBlockSize > this.fileData.length;
+	}
 
-    @Override
-    public void process() {
-        boolean isFinalPacket = false;
+	@Override
+	public void process() {
+		boolean isFinalPacket = false;
+		try {
+			if (this.requester == Resources.CLIENT) {
+				this.waitForACK();
+			}
 
-        while(!isFinalPacket) {
-            this.sendData();
-            this.blockNumber++; // increase the blockNumber after each write
-            this.waitForACK();
-            isFinalPacket =  isFinalPacket();
-        }
-    
-    }
+			while (!isFinalPacket) {
+				this.sendData();
+				this.blockNumber++; // increase the blockNumber after each write
+				this.waitForACK();
+				isFinalPacket = isFinalPacket();
+			}
+		} catch (SocketTimeoutException e) {
+			System.out.println("Socket has timed out. System will exit.");
+			System.exit(1);
+		}
+	}
 
-    /**
-     * This will a block of data to the receiver
-     */
-    private void sendData()
-    {
-        System.out.println("Sending Block: " + this.blockNumber);
-        DatagramPacket packet = createWritePacket();
-        Resources.printPacketInformation(packet);
-        Resources.sendPacket(packet, this.sendAndReceiveSocket);
-        System.out.println("Data sent\n");
-    }
+	/**
+	 * This will a block of data to the receiver
+	 */
+	private void sendData() {
+		System.out.println("Sending Block: " + this.blockNumber);
+		DatagramPacket packet = createWritePacket();
+		Resources.printPacketInformation(packet);
+		Resources.sendPacket(packet, this.sendAndReceiveSocket);
+		System.out.println("Data sent\n");
+	}
 
-    /**
-     * Waits of the receiver to send an ACK
-     */
-    public void waitForACK()
-    {
-        System.out.println("Wait to Receive ACK");
-        //wait for ack to start the writing process
-        DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
-        System.out.println("ACK Received:");
-        Resources.printPacketInformation(receivedPacket);
-        
-        if(Resources.packetRequestType(receivedPacket) == Request.ERROR)
-        {
-        	System.out.println("Recieved an error from the reciever. Exiting");
-        	System.exit(1);
-        }
-    }
+	/**
+	 * Waits of the receiver to send an ACK
+	 */
+	public void waitForACK() throws SocketTimeoutException {
+		System.out.println("Wait to Receive ACK");
+		// wait for ack to start the writing process
+		DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
+		System.out.println("ACK Received:");
+		Resources.printPacketInformation(receivedPacket);
 
-    /**
-     * Converts a file to a byte array
-     * @param filename the name of the file you want to convert to bytes
-     * @return the byte array of the file
-     */
-    private byte[] readFileAndConvertToByteArray(String filename){
-        File file = new File(filename);
-        byte[] fileBytes = new byte[(int) file.length()];
+		if (Resources.packetRequestType(receivedPacket) == Request.ERROR) {
+			System.out.println("Recieved an error from the reciever. Exiting");
+			System.exit(1);
+		}
+	}
 
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            fis.read(fileBytes); //read file into bytes[]
-            fis.close();
-        }
-        catch(FileNotFoundException ex) {
-            System.out.println(
-                    "Could not find " + filename +" Sending file not found error packet.");
-        	this.sendErrorPacket(IOErrorType.FileNotFound);
-            System.exit(1);
+	/**
+	 * Converts a file to a byte array
+	 * 
+	 * @param filename
+	 *            the name of the file you want to convert to bytes
+	 * @return the byte array of the file
+	 */
+	private byte[] readFileAndConvertToByteArray(String filename) {
+		File file = new File(filename);
+		byte[] fileBytes = new byte[(int) file.length()];
 
-        }
-        catch(SecurityException ex)
-        {
-            System.out.println(filename +" Packet is readonly. Sending access violation error packet.");
-        	this.sendErrorPacket(IOErrorType.AccessViolation);
-            System.exit(1);
-        }
-        catch(IOException ex) {
-            System.out.println(
-                    "IO Exception when reading '" + filename + "'");
-            System.exit(1);
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			fis.read(fileBytes); // read file into bytes[]
+			fis.close();
+		} catch (FileNotFoundException ex) {
+			System.out.println("Could not find " + filename + " Sending file not found error packet.");
+			this.sendErrorPacket(IOErrorType.FileNotFound);
+			System.exit(1);
 
-        }
-        return fileBytes;
-    }
+		} catch (SecurityException ex) {
+			System.out.println(filename + " Packet is readonly. Sending access violation error packet.");
+			this.sendErrorPacket(IOErrorType.AccessViolation);
+			System.exit(1);
+		} catch (IOException ex) {
+			System.out.println("IO Exception when reading '" + filename + "'");
+			System.exit(1);
 
-    /**
-     * Creates the packet with the file data.
-     * @return a DatagramPacket
-     */
-    private DatagramPacket createWritePacket()
-    {
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            outputStream.write(super.getPrefix(blockNumber));
-            outputStream.write(getFileData());
-            byte[] data = outputStream.toByteArray();
-            DatagramPacket packet = new DatagramPacket(data, data.length,address,port);
-            return packet;
-        }
-        catch(IOException ex) {
-            System.out.println(
-                    "IO Exception when reading creating write packet");
-            System.exit(1);
-        }
+		}
+		return fileBytes;
+	}
 
-        return null;
-    }
+	/**
+	 * Creates the packet with the file data.
+	 * 
+	 * @return a DatagramPacket
+	 */
+	private DatagramPacket createWritePacket() {
+		try {
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			outputStream.write(super.getPrefix(blockNumber));
+			outputStream.write(getFileData());
+			byte[] data = outputStream.toByteArray();
+			DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+			return packet;
+		} catch (IOException ex) {
+			System.out.println("IO Exception when reading creating write packet");
+			System.exit(1);
+		}
 
-    /**
-     * Gets one block of data from the file.
-     * @return One block of the file
-     */
-    private byte[] getFileData()
-    {
-        int start = this.blockNumber * maxBlockSize;
-        int end = start + maxBlockSize;
+		return null;
+	}
 
-        if(end > this.fileData.length)
-        {
-            end = this.fileData.length;
-        }
+	/**
+	 * Gets one block of data from the file.
+	 * 
+	 * @return One block of the file
+	 */
+	private byte[] getFileData() {
+		int start = this.blockNumber * maxBlockSize;
+		int end = start + maxBlockSize;
 
-        return Arrays.copyOfRange(this.fileData,start,end);
-    }
+		if (end > this.fileData.length) {
+			end = this.fileData.length;
+		}
+
+		return Arrays.copyOfRange(this.fileData, start, end);
+	}
 
 }

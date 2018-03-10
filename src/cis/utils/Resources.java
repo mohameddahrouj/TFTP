@@ -23,6 +23,10 @@ public class Resources {
 	//10s timeout
 	public static final int timeout = 300000;
 
+	
+	public static final int CLIENT = 1;
+	public static final int SERVER = 2;
+	
 	/**
 	 * Print packet information as string or bytes
 	 * @param packet Packet to be printed as string or byte representation
@@ -65,7 +69,7 @@ public class Resources {
 	 * @param socket Socket
 	 * @return Received datagram packet
 	 */
-	public static DatagramPacket receivePacket(DatagramSocket socket){
+	public static DatagramPacket receivePacket(DatagramSocket socket) throws SocketTimeoutException{
 		// Construct a DatagramPacket for receiving packets
 		byte data[] = new byte[516];
 
@@ -80,10 +84,6 @@ public class Resources {
 	    try {
 			// Block until a datagram is received via the socket
 			socket.receive(receivePacket);
-		}
-		catch(SocketTimeoutException e){
-	    	System.out.println("Socket has timed out. System will exit.");
-	    	System.exit(1);
 		}
 	    catch(IOException e) {
 			e.printStackTrace();

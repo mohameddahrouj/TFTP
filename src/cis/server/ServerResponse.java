@@ -7,6 +7,7 @@ import cis.handlers.Handler;
 import cis.handlers.ReceiverHandler;
 import cis.handlers.SenderHandler;
 import cis.utils.Request;
+import cis.utils.Resources;
 
 /**
  * ServerResponse is the class the server uses to send a response. It is a thread, so the
@@ -29,7 +30,8 @@ public class ServerResponse  implements Runnable{
                         sendingSocket,
                         receivedPacket.getAddress(),
                         receivedPacket.getPort(),
-                        filePath);
+                        filePath,
+                        Resources.SERVER);
             }
             else
             {
@@ -39,9 +41,10 @@ public class ServerResponse  implements Runnable{
                         receivedPacket.getAddress(),
                         receivedPacket.getPort(),
                         filePath,
-                        "Server");
+                        "Server",
+                        Resources.SERVER);
                 //Send the ack initially
-                ((ReceiverHandler)handler).sendAck(0);
+                //((ReceiverHandler)handler).sendAck(0);
             }
 
         }

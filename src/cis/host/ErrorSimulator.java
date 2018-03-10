@@ -3,6 +3,7 @@ package cis.host;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,24 +54,32 @@ public class ErrorSimulator {
 	{
 		//Receive request from client
 		System.out.println("Waiting to receive a request from client...");
-		DatagramPacket receivedPacket = Resources.receivePacket(clientSocket);
-		//Process the received packet from client socket
-		System.out.println("Error Simulator: Packet received:");
-		Resources.printPacketInformation(receivedPacket);
+		int port = 0;
+		DatagramPacket receivedPacket;
+		try {
+			receivedPacket = Resources.receivePacket(clientSocket);
+			//Process the received packet from client socket
+			System.out.println("Error Simulator: Packet received:");
+			Resources.printPacketInformation(receivedPacket);
 
-		int serverPort = getServerPort(receivedPacket);
+			int serverPort = getServerPort(receivedPacket);
 
-		//Form new packet from received packet
-		System.out.println("\nError Simulator: Forming new Packet:");
-		DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length, address, serverPort);
-		Resources.printPacketInformation(newPacket);
+			//Form new packet from received packet
+			System.out.println("\nError Simulator: Forming new Packet:");
+			DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length, address, serverPort);
+			Resources.printPacketInformation(newPacket);
 
-		//Send the newly formed packet to server
-		System.out.println("\nError Simulator: Sending packet to server:");
-		Resources.printPacketInformation(newPacket);
-		Resources.sendPacket(newPacket, serverSocket);
-		System.out.println("Error Simulator: Packet sent to server!\n");
-		return receivedPacket.getPort();
+			//Send the newly formed packet to server
+			System.out.println("\nError Simulator: Sending packet to server:");
+			Resources.printPacketInformation(newPacket);
+			Resources.sendPacket(newPacket, serverSocket);
+			System.out.println("Error Simulator: Packet sent to server!\n");
+			port = receivedPacket.getPort();
+		} 
+		catch (SocketTimeoutException e) {
+			e.printStackTrace();
+		}
+		return port;
 	}
 
 	/**
@@ -99,19 +108,25 @@ public class ErrorSimulator {
 	{
 		//Receive response packet from the server
 		System.out.println("Error Simulator: Waiting for packet from server\n");
-		DatagramPacket receivedServerPacket = Resources.receivePacket(serverSocket);
-		System.out.println("Error Simulator: Packet received from server:");
-		Resources.printPacketInformation(receivedServerPacket);
+		DatagramPacket receivedServerPacket;
+		try {
+			receivedServerPacket = Resources.receivePacket(serverSocket);
+			System.out.println("Error Simulator: Packet received from server:");
+			Resources.printPacketInformation(receivedServerPacket);
 
-		// save the port the server port
-		this.connections.put(clientPort,receivedServerPacket.getPort());
+			// save the port the server port
+			this.connections.put(clientPort,receivedServerPacket.getPort());
 
-		//Create new packet to send to client
-		DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(), receivedServerPacket.getData().length, address, clientPort);
-		System.out.println("\nIntermediate Host: Sending packet to client");
-		Resources.printPacketInformation(sendPacket);
-		Resources.sendPacket(sendPacket, clientSocket);
-		System.out.println("\nError Simulator: Packet sent to client!\n");
+			//Create new packet to send to client
+			DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(), receivedServerPacket.getData().length, address, clientPort);
+			System.out.println("\nIntermediate Host: Sending packet to client");
+			Resources.printPacketInformation(sendPacket);
+			Resources.sendPacket(sendPacket, clientSocket);
+			System.out.println("\nError Simulator: Packet sent to client!\n");
+		} catch (SocketTimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**

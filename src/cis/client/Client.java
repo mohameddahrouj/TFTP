@@ -101,14 +101,14 @@ public class Client {
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
-			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.clientPort, this.filePath, this.directory);
+			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.clientPort, this.filePath, this.directory, Resources.CLIENT);
 			receiverHandler.process();
 
 
 		} else if (this.request == Request.WRITE) {
 
-			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.clientPort,this.filePath);
-			senderHandler.waitForACK();
+			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.clientPort,this.filePath,Resources.CLIENT);
+			//senderHandler.waitForACK();
 			senderHandler.process();
 		}
 	}

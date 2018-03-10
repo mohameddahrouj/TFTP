@@ -21,8 +21,9 @@ public abstract class Handler {
     protected InetAddress address;
     protected int port;
     protected String filePath;
+    protected int requester;
 
-    public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port, String filePath)
+    public Handler(DatagramSocket sendAndReceiveSocket, byte prefix, InetAddress address, int port, String filePath, int requester)
     {
         //Initialize variables
         this.sendAndReceiveSocket = sendAndReceiveSocket;
@@ -30,6 +31,7 @@ public abstract class Handler {
         this.address = address;
         this.port = port;
         this.filePath = filePath;
+        this.requester = requester;
     }
 
     /**

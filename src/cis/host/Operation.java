@@ -16,9 +16,11 @@ public class Operation {
 	public Request type;
 	public int packetNumber;
 	public int delay;
+	private boolean hasErrorOccured;
 
 	public Operation() {
 		Scanner sn = new Scanner(System.in);
+		this.hasErrorOccured = false;
 		this.mode = getMode(sn);
 		if (mode != Mode.NORMAL) {
 			this.type = getRequestType(sn);
@@ -98,7 +100,7 @@ public class Operation {
 		}
 	}
 
-	public void sendPacket(DatagramPacket packet, DatagramSocket socket) {
+	public Mode sendPacket(DatagramPacket packet, DatagramSocket socket) {
 
 		int blockNumber = Resources.getBlockNumber(packet.getData());
 		Resources.printPacketInformation(packet);
@@ -106,19 +108,27 @@ public class Operation {
 			Resources.sendPacket(packet, socket);
 			System.out.println("Packet sent.");
 		} else if (isNetworkErrorPacket(blockNumber, Resources.packetRequestType(packet))) {
+			this.hasErrorOccured = true;
 			switch (this.mode) {
 			case DELAY:
 				System.out.println("Packet " + blockNumber + " will be delayed by " + this.delay + " seconds");
 				delaySendingPacket(packet, socket);
-				break;
+				return Mode.DELAY;
 			case LOSE:
 				System.out.println("Packet " + blockNumber + " will be dropped");
-				break;
+				return  Mode.LOSE;
 			case DUPLICATE:
 				System.out.println("Packet " + blockNumber + " will be duplicated");
 				Resources.sendPacket(packet, socket);
+				// send the second packet after a little delay
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					
+					e.printStackTrace();
+				}
 				Resources.sendPacket(packet, socket);
-				break;
+				return  Mode.DUPLICATE;
 			}
 		}
 		else
@@ -126,6 +136,7 @@ public class Operation {
 			Resources.sendPacket(packet, socket);
 			System.out.println("Packet sent.");
 		}
+		return Mode.NORMAL;
 	}
 
 	private void delaySendingPacket(DatagramPacket packet, DatagramSocket socket) {
@@ -144,11 +155,11 @@ public class Operation {
 
 	private boolean isNetworkErrorPacket(int blockNumber, Request requestType) {
 
-		if (requestType == this.type && (this.type == Request.READ || this.type == Request.WRITE)) {
-			return true;
+		if (requestType == this.type &&  !this.hasErrorOccured) {
+			return (this.type == Request.READ || this.type == Request.WRITE) || (this.packetNumber == blockNumber);
 		}
 
-		return requestType == this.type && this.packetNumber == blockNumber;
+		return  false;
 	}
 
 	public enum Mode {

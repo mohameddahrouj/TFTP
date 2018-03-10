@@ -1,5 +1,6 @@
 package cis.host;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import cis.host.Operation.Mode;
 import cis.utils.Request;
 import cis.utils.Resources;
 
@@ -23,7 +25,7 @@ public class ErrorSimulator {
 	DatagramSocket serverSocket;
 	InetAddress address;
 	Operation operation;
-	
+
 	private Map<Integer, Integer> connections;
 
 	public ErrorSimulator(Operation operation) {
@@ -75,9 +77,14 @@ public class ErrorSimulator {
 
 			// Send the newly formed packet to server
 			System.out.println("\nError Simulator: Sending packet to server:");
-			operation.sendPacket(newPacket, serverSocket);
+			if (operation.sendPacket(newPacket, serverSocket) == Mode.LOSE && operation.type != Request.ACK) {
+				this.forwardClientPacket();
+			}
+
 			port = receivedPacket.getPort();
 		} catch (SocketTimeoutException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return port;
@@ -103,7 +110,7 @@ public class ErrorSimulator {
 	}
 
 	/**
-	 * Forward the client packet to the server
+	 * Forward the server packet to the client
 	 */
 	private void forwardServerPacket(int clientPort) {
 		// Receive response packet from the server
@@ -121,13 +128,20 @@ public class ErrorSimulator {
 			DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(),
 					receivedServerPacket.getData().length, address, clientPort);
 			System.out.println("\nIntermediate Host: Sending packet to client");
-			operation.sendPacket(sendPacket, clientSocket);
+			if (operation.sendPacket(sendPacket, clientSocket) == Mode.LOSE && operation.type != Request.ACK) {
+				this.forwardServerPacket(clientPort);
+			}
+
 		} catch (SocketTimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 
 	/**
 	 * Execute the Error Simulator

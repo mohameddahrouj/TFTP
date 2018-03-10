@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 import cis.utils.IOErrorType;
 import cis.utils.Resources;
@@ -27,6 +28,12 @@ public abstract class Handler {
     {
         //Initialize variables
         this.sendAndReceiveSocket = sendAndReceiveSocket;
+        try {
+			this.sendAndReceiveSocket.setSoTimeout(1000);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         this.prefix = prefix;
         this.address = address;
         this.port = port;

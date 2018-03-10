@@ -42,21 +42,31 @@ public class SenderHandler extends Handler {
 	@Override
 	public void process() {
 		boolean isFinalPacket = false;
-		try {
-			if (this.requester == Resources.CLIENT) {
-				this.waitForACK();
-			}
 
-			while (!isFinalPacket) {
-				this.sendData();
-				this.blockNumber++; // increase the blockNumber after each write
+		if (this.requester == Resources.CLIENT) {
+			try {
 				this.waitForACK();
-				isFinalPacket = isFinalPacket();
+			} catch (SocketTimeoutException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (SocketTimeoutException e) {
-			System.out.println("Socket has timed out. System will exit.");
-			System.exit(1);
 		}
+
+		while (!isFinalPacket) {
+			this.sendData();
+			this.blockNumber++; // increase the blockNumber after each write
+			try {
+				this.waitForACK();
+			} catch (SocketTimeoutException e) {
+				this.blockNumber--;
+				System.out.println("Timeout has occurred. Resending block number " + this.blockNumber);				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			isFinalPacket = isFinalPacket();
+		}
+
 	}
 
 	/**
@@ -73,7 +83,7 @@ public class SenderHandler extends Handler {
 	/**
 	 * Waits of the receiver to send an ACK
 	 */
-	public void waitForACK() throws SocketTimeoutException {
+	public void waitForACK() throws IOException {
 		System.out.println("Wait to Receive ACK");
 		// wait for ack to start the writing process
 		DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);

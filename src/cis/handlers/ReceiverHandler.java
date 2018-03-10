@@ -30,6 +30,7 @@ public class ReceiverHandler extends Handler {
 	private List<Byte> buffer;
 	private final static int maxBlockLength = 516;
 	private FileOutputStream fileStream;
+	private int recievedBlocks =-1;
 
 	public ReceiverHandler(DatagramSocket socket, InetAddress address, int port, String fileName, String directory,
 			int requester) {
@@ -63,13 +64,18 @@ public class ReceiverHandler extends Handler {
 				}
 
 				// send Ack for data received
-				sendAck(Resources.getBlockNumber(receivedPacket.getData()));
-
+				int blockNumber = Resources.getBlockNumber(receivedPacket.getData());
+				sendAck(blockNumber);
 				bufferData(receivedPacket);
-				writeToFile();
+				if(blockNumber > this.recievedBlocks)
+				{
+					this.recievedBlocks = blockNumber;
+					writeToFile();
+				}
 				isFinalPacket = isFinalPacket(receivedPacket);
 			} catch (SocketTimeoutException e) {
-				// TODO Auto-generated catch block
+				System.out.println("Timeout has occured on the Reciever side.");
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}

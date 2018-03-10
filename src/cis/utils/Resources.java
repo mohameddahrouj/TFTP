@@ -32,13 +32,9 @@ public class Resources {
 	 * @param packet Packet to be printed as string or byte representation
 	 */
 	public static void printPacketInformation(DatagramPacket packet) {
-		System.out.println("From host: " + packet.getAddress());
-		System.out.println("Host port: " + packet.getPort());
-		System.out.println("Length: " + packet.getLength());
-		
-		// Form a String from the byte array.
-		String received = new String(packet.getData(),0,packet.getLength());
-		System.out.println("Containing String: " + received);
+//		System.out.println("From host: " + packet.getAddress());
+//		System.out.println("Host port: " + packet.getPort());
+//		System.out.println("Length: " + packet.getLength());
 		
 		//Print byte array
 		Formatter f = new Formatter();
@@ -121,6 +117,10 @@ public class Resources {
 		}
 		
 		return truncatedData;
+	}
+	
+	public static int getBlockNumber(byte[] data) {
+		return ((data[2] << 8) + data[3]);
 	}
 
 	/**

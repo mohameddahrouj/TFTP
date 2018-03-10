@@ -63,7 +63,7 @@ public class ReceiverHandler extends Handler {
 				}
 
 				// send Ack for data received
-				sendAck(getBlockNumber(receivedPacket.getData()));
+				sendAck(Resources.getBlockNumber(receivedPacket.getData()));
 
 				bufferData(receivedPacket);
 				writeToFile();
@@ -109,10 +109,6 @@ public class ReceiverHandler extends Handler {
 			System.exit(1);
 		}
 		return null;
-	}
-
-	private int getBlockNumber(byte[] data) {
-		return ((data[2] << 8) + data[3]);
 	}
 
 	/**

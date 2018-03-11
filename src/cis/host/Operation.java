@@ -5,6 +5,7 @@ import java.net.DatagramSocket;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import cis.utils.Request;
@@ -17,6 +18,8 @@ public class Operation {
 	public int packetNumber;
 	public int delay;
 	private boolean hasErrorOccured;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
 
 	public Operation() {
 		Scanner sn = new Scanner(System.in);
@@ -29,7 +32,7 @@ public class Operation {
 				this.packetNumber = getNumber(sn);
 			}
 			if (mode == Mode.DELAY) {
-				System.out.println("Please enter the time for the delay in seconds.");
+				System.out.println("Please enter the time for the delay in milliseconds.");
 				this.delay = getNumber(sn);
 			}
 		}
@@ -57,15 +60,11 @@ public class Operation {
 	 * @return the request type
 	 */
 	private Request getRequestType(Scanner inputScanner) {
-		System.out.println("Please Enter the type of packet. R for Read, W for Write, D for Data and A for ACK: ");
+		System.out.println("Please Enter the type of packet. D for Data and A for ACK: ");
 
 		while (true) {
 			String type = inputScanner.nextLine().toUpperCase();
-			if (type.equals(Request.READ.getType())) {
-				return Request.READ;
-			} else if (type.equals(Request.WRITE.getType())) {
-				return Request.WRITE;
-			} else if (type.equals(Request.DATA.getType())) {
+			if (type.equals(Request.DATA.getType())) {
 				return Request.DATA;
 			} else if (type.equals(Request.ACK.getType())) {
 				return Request.ACK;
@@ -111,8 +110,19 @@ public class Operation {
 			this.hasErrorOccured = true;
 			switch (this.mode) {
 			case DELAY:
-				System.out.println("Packet " + blockNumber + " will be delayed by " + this.delay + " seconds");
-				delaySendingPacket(packet, socket);
+				System.out.println("Packet " + blockNumber + " will be delayed by " + this.delay + " milliseconds");
+			
+				new java.util.Timer(true).schedule( 
+				        new java.util.TimerTask() {
+				            @Override
+				            public void run() {
+								Resources.sendPacket(packet, socket);
+								System.out.println("Sent delayed Packet");
+				            }
+				        }, 
+				        delay 
+				);
+				
 				return Mode.DELAY;
 			case LOSE:
 				System.out.println("Packet " + blockNumber + " will be dropped");
@@ -120,13 +130,6 @@ public class Operation {
 			case DUPLICATE:
 				System.out.println("Packet " + blockNumber + " will be duplicated");
 				Resources.sendPacket(packet, socket);
-				// send the second packet after a little delay
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					
-					e.printStackTrace();
-				}
 				Resources.sendPacket(packet, socket);
 				return  Mode.DUPLICATE;
 			}
@@ -136,27 +139,14 @@ public class Operation {
 			Resources.sendPacket(packet, socket);
 			System.out.println("Packet sent.");
 		}
+		
 		return Mode.NORMAL;
-	}
-
-	private void delaySendingPacket(DatagramPacket packet, DatagramSocket socket) {
-		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-		Runnable task = new Runnable() {
-			public void run() {
-				Resources.sendPacket(packet, socket);
-				System.out.println("Sent delayed Packet");
-			}
-		};
-
-		scheduler.schedule(task, this.delay, TimeUnit.SECONDS);
-		scheduler.shutdown();
 	}
 
 	private boolean isNetworkErrorPacket(int blockNumber, Request requestType) {
 
 		if (requestType == this.type &&  !this.hasErrorOccured) {
-			return (this.type == Request.READ || this.type == Request.WRITE) || (this.packetNumber == blockNumber);
+			return  (this.packetNumber == blockNumber);
 		}
 
 		return  false;

@@ -89,7 +89,14 @@ public class SenderHandler extends Handler {
 		DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
 		System.out.println("ACK Received:");
 		Resources.printPacketInformation(receivedPacket);
-
+		
+		if(Resources.getBlockNumber(receivedPacket.getData()) != (this.blockNumber-1))
+		{
+			// received delayed ACK packet since the block number of the ACK packet should be one less then the current block number
+			System.out.println("Recieved Delayed ACK Packet.");
+			this.waitForACK();
+		}
+		
 		if (Resources.packetRequestType(receivedPacket) == Request.ERROR) {
 			System.out.println("Recieved an error from the reciever. Exiting");
 			System.exit(1);
@@ -160,7 +167,7 @@ public class SenderHandler extends Handler {
 
 		if (end > this.fileData.length) {
 			end = this.fileData.length;
-		}
+		}	
 
 		return Arrays.copyOfRange(this.fileData, start, end);
 	}

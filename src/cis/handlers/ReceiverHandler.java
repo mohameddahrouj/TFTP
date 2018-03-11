@@ -30,7 +30,7 @@ public class ReceiverHandler extends Handler {
 	private List<Byte> buffer;
 	private final static int maxBlockLength = 516;
 	private FileOutputStream fileStream;
-	private int recievedBlocks =-1;
+	private int recievedBlocks = -1;
 
 	public ReceiverHandler(DatagramSocket socket, InetAddress address, int port, String fileName, String directory,
 			int requester) {
@@ -67,11 +67,9 @@ public class ReceiverHandler extends Handler {
 				int blockNumber = Resources.getBlockNumber(receivedPacket.getData());
 				sendAck(blockNumber);
 				bufferData(receivedPacket);
-				if(blockNumber > this.recievedBlocks)
-				{
-					this.recievedBlocks = blockNumber;
-					writeToFile();
-				}
+
+				writeToFile(blockNumber);
+
 				isFinalPacket = isFinalPacket(receivedPacket);
 			} catch (SocketTimeoutException e) {
 				System.out.println("Timeout has occured on the Reciever side.");
@@ -133,7 +131,18 @@ public class ReceiverHandler extends Handler {
 	/**
 	 * Write the data received to a local file.
 	 */
-	private void writeToFile() {
+	private void writeToFile(int blockNumber) {
+		
+		if(blockNumber <= this.recievedBlocks)
+		{
+			// if received data block is less then or equal to the most recent block then we
+			// already received this packet
+			System.out.println("Recieved Duplicate");
+			this.buffer.clear();
+			return;
+		}
+
+		this.recievedBlocks = blockNumber;
 		try {
 			fileStream.write(getData());
 			this.buffer.clear();

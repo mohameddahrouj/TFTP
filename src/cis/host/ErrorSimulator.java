@@ -8,6 +8,8 @@ import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import cis.host.Operation.Mode;
 import cis.utils.Request;
@@ -25,6 +27,7 @@ public class ErrorSimulator {
 	DatagramSocket serverSocket;
 	InetAddress address;
 	Operation operation;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	private Map<Integer, Integer> connections;
 
@@ -76,8 +79,10 @@ public class ErrorSimulator {
 			Resources.printPacketInformation(newPacket);
 
 			// Send the newly formed packet to server
+			Operation.Mode mode = operation.sendPacket(newPacket, serverSocket);
 			System.out.println("\nError Simulator: Sending packet to server:");
-			if (operation.sendPacket(newPacket, serverSocket) == Mode.LOSE && operation.type != Request.ACK) {
+			if ((mode == Mode.LOSE || mode == Mode.DELAY) && operation.type != Request.ACK)
+			{
 				this.forwardClientPacket();
 			}
 
@@ -128,7 +133,9 @@ public class ErrorSimulator {
 			DatagramPacket sendPacket = new DatagramPacket(receivedServerPacket.getData(),
 					receivedServerPacket.getData().length, address, clientPort);
 			System.out.println("\nIntermediate Host: Sending packet to client");
-			if (operation.sendPacket(sendPacket, clientSocket) == Mode.LOSE && operation.type != Request.ACK) {
+			Operation.Mode mode = operation.sendPacket(sendPacket, clientSocket);
+			if ((mode == Mode.LOSE || mode == Mode.DELAY) && operation.type != Request.ACK)
+			{
 				this.forwardServerPacket(clientPort);
 			}
 
@@ -139,9 +146,7 @@ public class ErrorSimulator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	
+	}	
 
 	/**
 	 * Execute the Error Simulator

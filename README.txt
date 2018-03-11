@@ -54,7 +54,7 @@ Utils:
 3. UCMWrite.png: UCM diagram of a write request
 4. Error timing diagrams.png: Timing diagrams for all error scenarios for iteration 2. There is no diagram for a write request FileNotFound error because a request is not sent in the first place if the file does not exist on the client side.
 5. Timing diagrams for lost ACK and DATA.png: Timing diagrams for lost ACK and DATA for iteration 3.
-
+6. ack_delay.png and packet_delay.png: Timing diagrams for delayed ACK and DATA for iter 3.
 
 | Deliverable   | Due Date    |
 |---------------|-------------|

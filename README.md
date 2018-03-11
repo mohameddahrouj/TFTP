@@ -47,7 +47,8 @@ Utils:
 6. Then you will be prompted to enter the path of a file.
 7a. If you enter a read request then the contents of the file that you specified will be transferred to a file of the same name in the Client folder.
 7b. If you enter a write request then the contents of the file that you specified will be transferred to a file of the same name in the Server folder.
-8. The server and the ErrorSimulator will shutdown after 300s of inactivity.
+8. The client and the server response will timeout after 1s.
+9. The server and the ErrorSimulator will shutdown after 300s of inactivity.
 
 ### Included  Images
 1. UMLClassDiagram.png: UML class diagram that shows all the classes and their dependencies

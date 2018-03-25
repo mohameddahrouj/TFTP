@@ -58,6 +58,7 @@ Utils:
 5. Timing diagrams for lost ACK and DATA.png: Timing diagrams for lost ACK and DATA for iteration 3.
 6. ack_delay.png and packet_delay.png: Timing diagrams for delayed ACK and DATA for iter 3.
 7. ack_duplicate.png: Timing diagram for duplicate ACK for iter 3.
+8. Timing diagrams for ERROR packets.png: Timing diagrams for ERROr packets for iteration 4.
 
 | Deliverable   | Due Date    |
 |---------------|-------------|

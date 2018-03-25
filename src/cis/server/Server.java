@@ -52,7 +52,6 @@ public class Server {
 	 */
 	public void receive(){
 		try {
-            System.out.println("Waiting to receive a request from intermediate host...");
             DatagramPacket receivedPacket = Resources.receivePacket(serverSocket);
             System.out.println("Server: Packet received:");
             Resources.printPacketInformation(receivedPacket);
@@ -96,7 +95,7 @@ public class Server {
 	 */
 	private Request packetRequestType(DatagramPacket packet) throws Exception {
 		Request request = Resources.packetRequestType(packet);
-		if(Request.INVALID == request)
+		if(Request.READ != request && Request.WRITE != request )
 			throw new Exception("Invalid Packet Received");
 		return request;
 	}
@@ -107,6 +106,7 @@ public class Server {
 	 */
 	public static void main(String[] args) {
 		Server server = new Server();
+        System.out.println("Waiting to receive a request from intermediate host...");
 		while(true) {
 			server.receive();
 		}

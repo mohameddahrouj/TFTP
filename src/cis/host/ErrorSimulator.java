@@ -76,12 +76,10 @@ public class ErrorSimulator {
 			System.out.println("\nError Simulator: Forming new Packet:");
 			DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length,
 					address, serverPort);
-			Resources.printPacketInformation(newPacket);
-
 			// Send the newly formed packet to server
 			Operation.Mode mode = operation.sendPacket(newPacket, serverSocket);
 			System.out.println("\nError Simulator: Sending packet to server:");
-			if ((mode == Mode.LOSE || mode == Mode.DELAY) && operation.type != Request.ACK)
+			if (listenOnSamePort(mode,operation.type))
 			{
 				this.forwardClientPacket();
 			}
@@ -104,7 +102,7 @@ public class ErrorSimulator {
 		int clientPort = packet.getPort();
 
 		// if the packet is an ACK/DATA packet then find the port
-		if (request == Request.ACK || request == Request.DATA) {
+		if (request != Request.WRITE && request != Request.READ) {
 			if (connections.containsKey(clientPort)) {
 				return connections.get(clientPort);
 			}
@@ -134,25 +132,26 @@ public class ErrorSimulator {
 					receivedServerPacket.getData().length, address, clientPort);
 			System.out.println("\nIntermediate Host: Sending packet to client");
 			Operation.Mode mode = operation.sendPacket(sendPacket, clientSocket);
-			if ((mode == Mode.LOSE || mode == Mode.DELAY) && operation.type != Request.ACK)
+			if (listenOnSamePort(mode,operation.type))
 			{
 				this.forwardServerPacket(clientPort);
 			}
-
 		} catch (SocketTimeoutException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}	
+	
+	private boolean listenOnSamePort(Mode mode, Request request)
+	{
+		return (mode == Mode.LOSE || mode == Mode.DELAY && operation.type != Request.ACK);
+	}
 
 	/**
 	 * Execute the Error Simulator
 	 * 
-	 * @param args
-	 *            Arguments
+	 * @param args Arguments
 	 */
 	public static void main(String[] args) {
 		ErrorSimulator es = new ErrorSimulator(new Operation());

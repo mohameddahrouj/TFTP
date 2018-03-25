@@ -57,8 +57,16 @@ public class ReceiverHandler extends Handler {
 				receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
 				System.out.println("Data Received: ");
 				Resources.printPacketInformation(receivedPacket);
-
-				if (Resources.packetRequestType(receivedPacket) == Request.ERROR) {
+				
+				Request type = Resources.packetRequestType(receivedPacket);
+				
+				if(type == Request.INVALID)
+				{
+					System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
+					super.sendErrorPacket(IOErrorType.IllegalOperation);
+					System.exit(1);
+				}
+				else if (type == Request.ERROR) {
 					System.out.println("Recieved an error from the sender. Exiting");
 					System.exit(1);
 				}
@@ -173,5 +181,4 @@ public class ReceiverHandler extends Handler {
 	private boolean isFinalPacket(DatagramPacket receivedPacket) {
 		return Resources.truncateData(receivedPacket.getData()).length < maxBlockLength;
 	}
-
 }

@@ -90,16 +90,24 @@ public class SenderHandler extends Handler {
 		System.out.println("ACK Received:");
 		Resources.printPacketInformation(receivedPacket);
 		
+		Request type = Resources.packetRequestType(receivedPacket);
+		
+		if(type == Request.INVALID)
+		{
+			System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
+			super.sendErrorPacket(IOErrorType.IllegalOperation);
+			System.exit(1);
+		}		
+		else if (type == Request.ERROR) {
+			System.out.println("Recieved an error from the reciever. Exiting");
+			System.exit(1);
+		}
+		
 		if(Resources.getBlockNumber(receivedPacket.getData()) != (this.blockNumber-1))
 		{
 			// received delayed ACK packet since the block number of the ACK packet should be one less then the current block number
 			System.out.println("Recieved Delayed ACK Packet.");
 			this.waitForACK();
-		}
-		
-		if (Resources.packetRequestType(receivedPacket) == Request.ERROR) {
-			System.out.println("Recieved an error from the reciever. Exiting");
-			System.exit(1);
 		}
 	}
 

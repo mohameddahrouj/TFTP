@@ -14,6 +14,8 @@ public enum IOErrorType {
 	FileNotFound(1,"File not Found"),
 	AccessViolation(2," Access violation"),
 	DiskFull(3, "Disk full"),
+	IllegalOperation(4,"Illegal Operation."),
+	UnkownTransferID(5,"Unkown Operation"),
 	FileExists(6, "File exists");
 	
 	private int errorCode;

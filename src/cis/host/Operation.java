@@ -3,11 +3,6 @@ package cis.host;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Scanner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import cis.utils.Request;
 import cis.utils.Resources;
 
@@ -18,8 +13,6 @@ public class Operation {
 	public int packetNumber;
 	public int delay;
 	private boolean hasErrorOccured;
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
 
 	public Operation() {
 		Scanner sn = new Scanner(System.in);
@@ -81,7 +74,7 @@ public class Operation {
 	 */
 	private Mode getMode(Scanner inputScanner) {
 		System.out.println("Please Enter Operation Mode."
-				+ " Enter 0 for normal operation; 1 to lose a packet; 2 to delay a packet; 3 to duplicate a packet ");
+				+ " Enter 0 for normal operation; 1 to lose a packet; 2 to delay a packet; 3 to duplicate a packet; 4 for invalid opcode ");
 
 		while (true) {
 			String mode = inputScanner.nextLine().toUpperCase();
@@ -93,6 +86,8 @@ public class Operation {
 				return Mode.DELAY;
 			} else if (mode.equals("3")) {
 				return Mode.DUPLICATE;
+			} else if (mode.equals("4")) {
+				return Mode.ILLEGAL;
 			} else {
 				System.out.println("Not a valid mode.");
 			}
@@ -111,48 +106,52 @@ public class Operation {
 			switch (this.mode) {
 			case DELAY:
 				System.out.println("Packet " + blockNumber + " will be delayed by " + this.delay + " milliseconds");
-			
-				new java.util.Timer(true).schedule( 
-				        new java.util.TimerTask() {
-				            @Override
-				            public void run() {
-								Resources.sendPacket(packet, socket);
-								System.out.println("Sent delayed Packet");
-				            }
-				        }, 
-				        delay 
-				);
-				
+
+				new java.util.Timer(true).schedule(new java.util.TimerTask() {
+					@Override
+					public void run() {
+						Resources.sendPacket(packet, socket);
+						System.out.println("Sent delayed Packet");
+					}
+				}, delay);
+
 				return Mode.DELAY;
+			case ILLEGAL:
+				System.out.println("Packet " + blockNumber + " will have a illegal opcode");
+				byte[] data = new byte[4];
+		        data[0] = 0;
+		        data[1] = -23;
+				DatagramPacket illegalPacket = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
+				Resources.sendPacket(illegalPacket, socket);
+				System.out.println("Packet sent.");
+				return Mode.ILLEGAL;
 			case LOSE:
 				System.out.println("Packet " + blockNumber + " will be dropped");
-				return  Mode.LOSE;
+				return Mode.LOSE;
 			case DUPLICATE:
 				System.out.println("Packet " + blockNumber + " will be duplicated");
 				Resources.sendPacket(packet, socket);
 				Resources.sendPacket(packet, socket);
-				return  Mode.DUPLICATE;
+				return Mode.DUPLICATE;
 			}
-		}
-		else
-		{
+		} else {
 			Resources.sendPacket(packet, socket);
 			System.out.println("Packet sent.");
 		}
-		
+
 		return Mode.NORMAL;
 	}
 
 	private boolean isNetworkErrorPacket(int blockNumber, Request requestType) {
 
-		if (requestType == this.type &&  !this.hasErrorOccured) {
-			return  (this.packetNumber == blockNumber);
+		if (requestType == this.type && !this.hasErrorOccured) {
+			return (this.packetNumber == blockNumber);
 		}
 
-		return  false;
+		return false;
 	}
 
 	public enum Mode {
-		NORMAL, LOSE, DELAY, DUPLICATE
+		NORMAL, LOSE, DELAY, DUPLICATE, ILLEGAL
 	}
 }

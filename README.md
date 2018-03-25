@@ -42,7 +42,7 @@ Utils:
 1. Execute the Server.java in server folder (main)
 2. Execute the ErrorSimulator.java in host folder (main)
 3. Execute the Client.java in client folder (main)
-4. After starting the Client you will be prompted to enter whether or not you want to delay/duplicate/ lose packet  
+4. After starting the Error Simulator you will be prompted to enter whether or not you want to delay/duplicate/ lose packet or send a illegal packet.  
 5. After starting the Client you will be prompted to enter the request type. Type `R` for a read request or `W` for a write request.
 6. Then you will be prompted to enter the path of a file.
 7a. If you enter a read request then the contents of the file that you specified will be transferred to a file of the same name in the Client folder.

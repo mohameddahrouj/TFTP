@@ -65,6 +65,7 @@ public class SenderHandler extends Handler {
 			}
 			isFinalPacket = isFinalPacket();
 		}
+		System.out.println("Last Packet sent and ack was recieved. Exiting");
 	}
 	
 	private void waitForInitialACK()
@@ -209,6 +210,10 @@ public class SenderHandler extends Handler {
 	private byte[] getFileData() {
 		int start = this.blockNumber * maxBlockSize;
 		int end = start + maxBlockSize;
+		if(start >= this.fileData.length)
+		{
+			return new byte[] {};
+		}
 
 		if (end > this.fileData.length) {
 			end = this.fileData.length;

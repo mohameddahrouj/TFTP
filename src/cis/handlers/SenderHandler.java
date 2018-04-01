@@ -24,10 +24,16 @@ public class SenderHandler extends Handler {
 
 	private int blockNumber;
 	private byte[] fileData;
+	private int ackBlockNumber;
 
 	public SenderHandler(DatagramSocket socket, InetAddress address, int port, String file, int requester) {
 		super(socket, prefixNumber, address, port, file, requester);
 		this.blockNumber = 0;
+		if (requester == Resources.CLIENT) {
+			this.ackBlockNumber = 0; // the first ACK will have a number of 0 if the client is sending .
+		} else {
+			this.ackBlockNumber = 1;
+		}
 		this.fileData = readFileAndConvertToByteArray(this.filePath);
 	}
 
@@ -60,7 +66,7 @@ public class SenderHandler extends Handler {
 				this.waitForACK();
 			} catch (SocketTimeoutException e) {
 				this.blockNumber--;
-				System.out.println("Timeout has occurred. Resending block number " + this.blockNumber);				
+				System.out.println("Timeout has occurred. Resending block number " + this.blockNumber);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -89,26 +95,26 @@ public class SenderHandler extends Handler {
 		DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
 		System.out.println("ACK Received:");
 		Resources.printPacketInformation(receivedPacket);
-		
+		int receivedAck = Resources.getBlockNumber(receivedPacket.getData());
 		Request type = Resources.packetRequestType(receivedPacket);
-		
-		if(type == Request.INVALID)
-		{
+
+		if (type == Request.INVALID) {
 			System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
 			super.sendErrorPacket(IOErrorType.IllegalOperation);
 			System.exit(1);
-		}		
-		else if (type == Request.ERROR) {
+		} else if (type == Request.ERROR) {
 			System.out.println("Recieved an error from the reciever. Exiting");
 			System.exit(1);
 		}
-		
-		if(Resources.getBlockNumber(receivedPacket.getData()) != (this.blockNumber-1))
-		{
-			// received delayed ACK packet since the block number of the ACK packet should be one less then the current block number
-			System.out.println("Recieved Delayed ACK Packet.");
+
+		if (receivedAck != this.ackBlockNumber) {
+			// received delayed ACK packet since the block number of the ACK packet should
+			// be one less then the current block number
+			System.out.println("Recieved Delayed ACK Packet.Expected " + this.ackBlockNumber + " recieved is " + receivedAck);
 			this.waitForACK();
 		}
+
+		this.ackBlockNumber++;
 	}
 
 	/**
@@ -151,7 +157,7 @@ public class SenderHandler extends Handler {
 	private DatagramPacket createWritePacket() {
 		try {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			outputStream.write(super.getPrefix(blockNumber));
+			outputStream.write(super.getPrefix(blockNumber + 1));
 			outputStream.write(getFileData());
 			byte[] data = outputStream.toByteArray();
 			DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
@@ -175,7 +181,7 @@ public class SenderHandler extends Handler {
 
 		if (end > this.fileData.length) {
 			end = this.fileData.length;
-		}	
+		}
 
 		return Arrays.copyOfRange(this.fileData, start, end);
 	}

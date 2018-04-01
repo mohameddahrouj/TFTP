@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cis.utils.IOErrorType;
@@ -27,16 +28,15 @@ import cis.utils.Resources;
 public class ReceiverHandler extends Handler {
 
 	private static final byte prefixNumber = 4;
-	private List<Byte> buffer;
 	private final static int maxBlockLength = 516;
 	private FileOutputStream fileStream;
-	private int recievedBlocks = -1;
+	private int recievedBlocks;
 
 	public ReceiverHandler(DatagramSocket socket, InetAddress address, int port, String fileName, String directory,
 			int requester) {
 		super(socket, prefixNumber, address, port, fileName, requester);
 		this.fileStream = this.createFile(directory);
-		this.buffer = new ArrayList<>();
+		this.recievedBlocks = 0;
 	}
 
 	@Override
@@ -51,33 +51,11 @@ public class ReceiverHandler extends Handler {
 		while (!isFinalPacket) {
 
 			try {
-				// Wait to get data
-				System.out.println("Waiting to get Data");
-				DatagramPacket receivedPacket;
-				receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
-				System.out.println("Data Received: ");
-				Resources.printPacketInformation(receivedPacket);
-				
-				Request type = Resources.packetRequestType(receivedPacket);
-				
-				if(type == Request.INVALID)
-				{
-					System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
-					super.sendErrorPacket(IOErrorType.IllegalOperation);
-					System.exit(1);
-				}
-				else if (type == Request.ERROR) {
-					System.out.println("Recieved an error from the sender. Exiting");
-					System.exit(1);
-				}
-
+				DatagramPacket receivedPacket = waitForData();
 				// send Ack for data received
 				int blockNumber = Resources.getBlockNumber(receivedPacket.getData());
 				sendAck(blockNumber);
-				bufferData(receivedPacket);
-
-				writeToFile(blockNumber);
-
+				writeToFile(blockNumber,receivedPacket.getData());
 				isFinalPacket = isFinalPacket(receivedPacket);
 			} catch (SocketTimeoutException e) {
 				System.out.println("Timeout has occured on the Reciever side.");
@@ -91,6 +69,28 @@ public class ReceiverHandler extends Handler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private DatagramPacket waitForData() throws IOException
+	{
+		System.out.println("Waiting to get Data");
+		DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
+		System.out.println("Data Received: ");
+		Resources.printPacketInformation(receivedPacket);		
+		Request type = Resources.packetRequestType(receivedPacket);
+		
+		if(type == Request.INVALID)
+		{
+			System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
+			super.sendErrorPacket(IOErrorType.IllegalOperation);
+			System.exit(1);
+		}
+		else if (type == Request.ERROR) {
+			System.out.println("Recieved an error from the sender. Exiting");
+			System.exit(1);
+		}
+		
+		return receivedPacket;
 	}
 
 	public void sendAck(int blockNumber) {
@@ -124,51 +124,27 @@ public class ReceiverHandler extends Handler {
 	}
 
 	/**
-	 * Save the data received from the sender.
-	 * 
-	 * @param packet
-	 *            The packet received from the sender.
-	 */
-	private void bufferData(DatagramPacket packet) {
-		byte[] data = packet.getData();
-		for (int i = 4; i < data.length; i++) {
-			this.buffer.add(data[i]);
-		}
-	}
-
-	/**
 	 * Write the data received to a local file.
 	 */
-	private void writeToFile(int blockNumber) {
+	private void writeToFile(int blockNumber, byte[] data) {
 		
 		if(blockNumber <= this.recievedBlocks)
 		{
 			// if received data block is less then or equal to the most recent block then we
 			// already received this packet
 			System.out.println("Recieved Duplicate");
-			this.buffer.clear();
 			return;
 		}
 
 		this.recievedBlocks = blockNumber;
 		try {
-			fileStream.write(getData());
-			this.buffer.clear();
+			fileStream.write(Arrays.copyOfRange(data, 4, data.length));
 		} catch (IOException exception) {
 			System.out.println("Error copying data to file");
 			super.sendErrorPacket(IOErrorType.DiskFull);
 			exception.printStackTrace();
 			System.exit(1);
 		}
-	}
-
-	private byte[] getData() {
-		byte[] data = new byte[this.buffer.size()];
-
-		for (int i = 0; i < this.buffer.size(); i++) {
-			data[i] = this.buffer.get(i);
-		}
-		return data;
 	}
 
 	/**

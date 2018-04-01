@@ -55,7 +55,6 @@ public class SenderHandler extends Handler {
 
 		while (!isFinalPacket) {
 			this.sendData();
-			this.blockNumber++; // increase the blockNumber after each write
 			try {
 				this.waitForACK();
 			} catch (SocketTimeoutException e) {
@@ -85,11 +84,12 @@ public class SenderHandler extends Handler {
 	 * This will a block of data to the receiver
 	 */
 	private void sendData() {
-		System.out.println("Sending Block: " + this.blockNumber);
+		System.out.println("Sending Block: " + (this.blockNumber+1));
 		DatagramPacket packet = createWritePacket();
 		Resources.printPacketInformation(packet);
 		Resources.sendPacket(packet, this.sendAndReceiveSocket);
 		System.out.println("Data sent\n");
+		this.blockNumber++; // increase the blockNumber after each write
 	}
 	
 	private void sendWriteRequest()
@@ -110,23 +110,39 @@ public class SenderHandler extends Handler {
 		System.out.println("ACK Received:");
 		Resources.printPacketInformation(receivedPacket);
 		int receivedAck = Resources.getBlockNumber(receivedPacket.getData());
-		Request type = Resources.packetRequestType(receivedPacket);
+		Request type = Resources.packetRequestType(receivedPacket);	
+		processPacket(receivedPacket);
 
-		if (type == Request.INVALID) {
-			System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
-			super.sendErrorPacket(IOErrorType.IllegalOperation);
-			System.exit(1);
-		} else if (type == Request.ERROR) {
-			System.out.println("Recieved an error from the reciever. Exiting");
-			System.exit(1);
+		if (type == Request.ERROR) {
+			IOErrorType error = super.getErrorType(receivedPacket.getData());
+			System.out.println("Recieved an error packet. Packet is of type " + error.getErrorMessage());
+			if(error == IOErrorType.UnkownTransferID)
+			{
+				System.out.println("Resending the previous packet");
+				this.blockNumber--;
+				this.sendData();
+				this.waitForACK();
+				return;
+			}
+			else
+			{
+				System.out.println("Closing the connection and exiting");
+				System.exit(1);
+			}
 		}
-
-		if (receivedAck != this.ackBlockNumber) {
-			// received delayed ACK packet since the block number of the ACK packet should
-			// be one less then the current block number
+		
+		else if (receivedAck != this.ackBlockNumber) {
 			System.out.println(
-					"Recieved Delayed ACK Packet.Expected " + this.ackBlockNumber + " recieved is " + receivedAck);
+					"Recieved Delayed/Duplicate ACK Packet.Expected " + this.ackBlockNumber + " recieved is " + receivedAck);
 			this.waitForACK();
+			return;
+		}
+		else if(receivedPacket.getPort() != this.port)
+		{
+			System.out.println("Recieved a packet with an unkown transfer id. Sending error packet");
+			this.sendErrorPacket(IOErrorType.UnkownTransferID);
+			this.waitForACK();
+			return;
 		}
 
 		this.ackBlockNumber++;

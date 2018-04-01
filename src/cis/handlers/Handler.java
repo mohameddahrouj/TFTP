@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 import cis.utils.IOErrorType;
+import cis.utils.Request;
 import cis.utils.Resources;
 
 /**
@@ -66,6 +67,51 @@ public abstract class Handler {
     	DatagramPacket packet = new DatagramPacket(data, data.length,address,port);
     	Resources.sendPacket(packet, sendAndReceiveSocket);
     }
+    
+    protected void processPacket(DatagramPacket receivedPacket)
+    {	
+		Request type = Resources.packetRequestType(receivedPacket);	
+		if(type == Request.INVALID)
+		{
+			System.out.println("Recieved a packet with an incorrect opcode. Sending error packet then exiting");
+			this.sendErrorPacket(IOErrorType.IllegalOperation);
+			System.exit(1);
+		}
+    }
+    
+    
+    
+    protected IOErrorType getErrorType(byte[] data)
+    {
+    	int errorCode = data[3];
+    	if(IOErrorType.FileNotFound.getErrorCode() == errorCode)
+    	{
+    		return IOErrorType.FileNotFound;
+    	}
+    	else if(IOErrorType.AccessViolation.getErrorCode() == errorCode)
+    	{
+    		return IOErrorType.AccessViolation;
+    	}
+    	else if(IOErrorType.DiskFull.getErrorCode() == errorCode)
+    	{
+    		return IOErrorType.DiskFull;
+    	}
+    	else if(IOErrorType.IllegalOperation.getErrorCode() == errorCode)
+    	{
+    		return IOErrorType.IllegalOperation;
+    	}
+    	else if(IOErrorType.UnkownTransferID.getErrorCode() == errorCode)
+    	{
+    		return IOErrorType.UnkownTransferID;
+    	}
+    	else if(IOErrorType.FileExists.getErrorCode() == errorCode)
+    	{
+    		return IOErrorType.FileExists;
+    	}
+    	
+    	return null;
+    }
 
     public abstract void process();
+    
 }

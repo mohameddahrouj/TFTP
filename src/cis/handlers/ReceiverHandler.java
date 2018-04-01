@@ -77,22 +77,34 @@ public class ReceiverHandler extends Handler {
 		DatagramPacket receivedPacket = Resources.receivePacket(this.sendAndReceiveSocket);
 		System.out.println("Data Received: ");
 		Resources.printPacketInformation(receivedPacket);		
-		Request type = Resources.packetRequestType(receivedPacket);
+		Request type = Resources.packetRequestType(receivedPacket);	
+		processPacket(receivedPacket);
 		
-		if(type == Request.INVALID)
-		{
-			System.out.println("Recieved an incorrect opcode from the reciever.Sending error packet then exiting");
-			super.sendErrorPacket(IOErrorType.IllegalOperation);
-			System.exit(1);
-		}
-		else if (type == Request.ERROR) {
-			System.out.println("Recieved an error from the sender. Exiting");
-			System.exit(1);
+		if (type == Request.ERROR) {
+			IOErrorType error = super.getErrorType(receivedPacket.getData());
+			System.out.println("Recieved an error packet. Packet is of type " + error.getErrorMessage());
+			if(error == IOErrorType.UnkownTransferID)
+			{
+				System.out.println("Resending the previous packet");
+				sendAck(this.recievedBlocks);
+				return this.waitForData();
+			}
+			else
+			{
+				System.out.println("Closing the connection and exiting");
+				System.exit(1);
+			}
 		}
 		else if(type == Request.WRITE)
 		{
 			System.out.println("Recieved a write Request. Resending the initial ack");
 			this.sendAck(0);
+			return this.waitForData();
+		}
+		else if(receivedPacket.getPort() != this.port)
+		{
+			System.out.println("Recieved a packet with an unkown transfer id. Sending error packet");
+			this.sendErrorPacket(IOErrorType.UnkownTransferID);
 			return this.waitForData();
 		}
 		

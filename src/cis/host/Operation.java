@@ -2,6 +2,7 @@ package cis.host;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.util.Scanner;
 import cis.utils.Request;
 import cis.utils.Resources;
@@ -74,7 +75,7 @@ public class Operation {
 	 */
 	private Mode getMode(Scanner inputScanner) {
 		System.out.println("Please Enter Operation Mode."
-				+ " Enter 0 for normal operation; 1 to lose a packet; 2 to delay a packet; 3 to duplicate a packet; 4 for invalid opcode ");
+				+ " Enter 0 for normal operation; 1 to lose a packet; 2 to delay a packet; 3 to duplicate a packet; 4 for invalid opcode; 5 for unkown transfer id.");
 
 		while (true) {
 			String mode = inputScanner.nextLine().toUpperCase();
@@ -88,6 +89,8 @@ public class Operation {
 				return Mode.DUPLICATE;
 			} else if (mode.equals("4")) {
 				return Mode.ILLEGAL;
+			} else if (mode.equals("5")) {
+				return Mode.UNKOWN_TRANSFER;
 			} else {
 				System.out.println("Not a valid mode.");
 			}
@@ -119,9 +122,10 @@ public class Operation {
 			case ILLEGAL:
 				System.out.println("Packet " + blockNumber + " will have a illegal opcode");
 				byte[] data = new byte[4];
-		        data[0] = 0;
-		        data[1] = -23;
-				DatagramPacket illegalPacket = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
+				data[0] = 0;
+				data[1] = -23;
+				DatagramPacket illegalPacket = new DatagramPacket(data, data.length, packet.getAddress(),
+						packet.getPort());
 				Resources.sendPacket(illegalPacket, socket);
 				System.out.println("Packet sent.");
 				return Mode.ILLEGAL;
@@ -133,6 +137,10 @@ public class Operation {
 				Resources.sendPacket(packet, socket);
 				Resources.sendPacket(packet, socket);
 				return Mode.DUPLICATE;
+			case UNKOWN_TRANSFER:
+				System.out.println("Packet " + blockNumber + " will be sent with an unkown transfer code.");
+				this.sendPacketWithUnkownTransferID(packet);
+				return Mode.UNKOWN_TRANSFER;
 			}
 		} else {
 			Resources.sendPacket(packet, socket);
@@ -140,6 +148,18 @@ public class Operation {
 		}
 
 		return Mode.NORMAL;
+	}
+	
+	private void sendPacketWithUnkownTransferID(DatagramPacket packet)
+	{
+		try {
+			DatagramSocket socket = new DatagramSocket();
+			Resources.sendPacket(packet, socket);
+			socket.close();
+		} catch (SocketException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	private boolean isNetworkErrorPacket(int blockNumber, Request requestType) {
@@ -152,6 +172,6 @@ public class Operation {
 	}
 
 	public enum Mode {
-		NORMAL, LOSE, DELAY, DUPLICATE, ILLEGAL
+		NORMAL, LOSE, DELAY, DUPLICATE, ILLEGAL, UNKOWN_TRANSFER
 	}
 }

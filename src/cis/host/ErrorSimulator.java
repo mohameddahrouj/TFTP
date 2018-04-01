@@ -35,7 +35,7 @@ public class ErrorSimulator {
 		try {
 			this.connections = new HashMap<>();
 			// Initialize client socket at the shared port
-			clientSocket = new DatagramSocket(Resources.clientPort);
+			clientSocket = new DatagramSocket(Resources.errorSimulatorPort);
 			// Initialize server socket at any port
 			serverSocket = new DatagramSocket();
 			serverSocket.setSoTimeout(Resources.timeout);
@@ -98,17 +98,13 @@ public class ErrorSimulator {
 	 */
 	private int getServerPort(DatagramPacket packet) {
 
-		Request request = Resources.packetRequestType(packet);
 		int clientPort = packet.getPort();
 
-		// if the packet is an ACK/DATA packet then find the port
-		if (request != Request.WRITE && request != Request.READ) {
-			if (connections.containsKey(clientPort)) {
-				return connections.get(clientPort);
-			}
+		if (this.connections.containsKey(clientPort)) {
+			return this.connections.get(clientPort);
 		}
-
-		connections.put(clientPort, -1);
+		
+		this.connections.put(clientPort, -1);
 		return Resources.serverPort;
 	}
 
@@ -145,7 +141,7 @@ public class ErrorSimulator {
 	
 	private boolean listenOnSamePort(Mode mode, Request request)
 	{
-		return (mode == Mode.LOSE || mode == Mode.DELAY && operation.type != Request.ACK);
+		return (mode == Mode.LOSE || mode == Mode.DELAY) && operation.type != Request.ACK;
 	}
 
 	/**

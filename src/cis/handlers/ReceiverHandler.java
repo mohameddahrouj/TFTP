@@ -32,9 +32,9 @@ public class ReceiverHandler extends Handler {
 	private FileOutputStream fileStream;
 	private int recievedBlocks;
 
-	public ReceiverHandler(DatagramSocket socket, InetAddress address, int port, String fileName, String directory,
+	public ReceiverHandler(DatagramSocket socket, InetAddress address, int port, String filePath, String directory,
 			int requester) {
-		super(socket, prefixNumber, address, port, fileName, requester);
+		super(socket, prefixNumber, address, port, filePath, requester);
 		this.fileStream = this.createFile(directory);
 		this.recievedBlocks = 0;
 	}
@@ -88,6 +88,12 @@ public class ReceiverHandler extends Handler {
 		else if (type == Request.ERROR) {
 			System.out.println("Recieved an error from the sender. Exiting");
 			System.exit(1);
+		}
+		else if(type == Request.WRITE)
+		{
+			System.out.println("Recieved a write Request. Resending the initial ack");
+			this.sendAck(0);
+			return this.waitForData();
 		}
 		
 		return receivedPacket;

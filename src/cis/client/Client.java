@@ -21,9 +21,7 @@ import cis.utils.Resources;
 public class Client {
 	private DatagramSocket socket;
 
-	private final String octet = "octet";
 	private final String directory = "Client";
-	private byte[] mode;
 	private String filePath;
 	private Request request;
 	
@@ -37,9 +35,7 @@ public class Client {
 	        // send and receive UDP Datagram packets.
 			socket = new DatagramSocket();
 			inputScanner = new Scanner(System.in);
-			//Initialize octet bytes
-			mode = octet.getBytes();
-			
+			//Initialize octet bytes			
 			//Initialize address
 			address = InetAddress.getLocalHost();
             this.request = getRequestType();
@@ -51,38 +47,16 @@ public class Client {
 			System.exit(1);
 		}
 	}
-	
-	/**
-	 * Read request format as per specification
-	 */
-	private byte[] createRequest(){
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-		try {
-			byteArrayOutputStream.write(this.request.getBytes());
-			byteArrayOutputStream.write(this.filePath.getBytes());
-			byteArrayOutputStream.write(0);
-			byteArrayOutputStream.write(mode);
-			byteArrayOutputStream.write(0);
-		}
-		catch (IOException exception)
-		{
-			exception.printStackTrace();
-			System.exit(1);
-		}
-
-		return byteArrayOutputStream.toByteArray();
-	}
 
 	/**
 	 * Sends the initial read/write request to error simulator
 	 */
 	private void sendRequest()
 	{
-		byte[] request = createRequest();
+		byte[] request = Resources.createRequest(this.request,this.filePath);
 
 		//Send the packet given request, address and port
-		DatagramPacket packet = new DatagramPacket(request, request.length, address, Resources.clientPort);
+		DatagramPacket packet = new DatagramPacket(request, request.length, address, Resources.errorSimulatorPort);
 		System.out.println("Client: Sending packet to intermediate host:");
 		Resources.printPacketInformation(packet);
 		Resources.sendPacket(packet, socket);
@@ -101,13 +75,13 @@ public class Client {
 		this.sendRequest();
 
 		if (this.request == Request.READ) {
-			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.clientPort, this.filePath, this.directory, Resources.CLIENT);
+			ReceiverHandler receiverHandler = new ReceiverHandler(this.socket, address, Resources.errorSimulatorPort, this.filePath, this.directory, Resources.CLIENT);
 			receiverHandler.process();
 
 
 		} else if (this.request == Request.WRITE) {
 
-			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.clientPort,this.filePath,Resources.CLIENT);
+			SenderHandler senderHandler = new SenderHandler(this.socket, address, Resources.errorSimulatorPort,this.filePath,Resources.CLIENT);
 			//senderHandler.waitForACK();
 			senderHandler.process();
 		}

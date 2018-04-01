@@ -1,5 +1,6 @@
 package cis.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,8 +16,10 @@ import java.util.Formatter;
  *
  */
 public class Resources {
+	private static final String octet = "octet";
+
 	// Shared port between client and intermediate host
-	public static final int clientPort = 23;
+	public static final int errorSimulatorPort = 23;
 
 	// Shared port between intermediate host and server
 	public static final int serverPort = 69;
@@ -155,5 +158,27 @@ public class Resources {
 		File file = new File(filePath);
 
 		return file.exists() && !file.isDirectory();
+	}
+	
+	/**
+	 * Create request format as per specification
+	 */
+	public static byte[] createRequest(Request request, String filePath){
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+		try {
+			byteArrayOutputStream.write(request.getBytes());
+			byteArrayOutputStream.write(filePath.getBytes());
+			byteArrayOutputStream.write(0);
+			byteArrayOutputStream.write(octet.getBytes());
+			byteArrayOutputStream.write(0);
+		}
+		catch (IOException exception)
+		{
+			exception.printStackTrace();
+			System.exit(1);
+		}
+
+		return byteArrayOutputStream.toByteArray();
 	}
 }

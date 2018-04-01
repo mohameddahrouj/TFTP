@@ -26,8 +26,8 @@ public class SenderHandler extends Handler {
 	private byte[] fileData;
 	private int ackBlockNumber;
 
-	public SenderHandler(DatagramSocket socket, InetAddress address, int port, String file, int requester) {
-		super(socket, prefixNumber, address, port, file, requester);
+	public SenderHandler(DatagramSocket socket, InetAddress address, int port, String filePath, int requester) {
+		super(socket, prefixNumber, address, port, filePath, requester);
 		this.blockNumber = 0;
 		if (requester == Resources.CLIENT) {
 			this.ackBlockNumber = 0; // the first ACK will have a number of 0 if the client is sending .
@@ -50,13 +50,7 @@ public class SenderHandler extends Handler {
 		boolean isFinalPacket = false;
 
 		if (this.requester == Resources.CLIENT) {
-			try {
-				this.waitForACK();
-			} catch (SocketTimeoutException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			waitForInitialACK();
 		}
 
 		while (!isFinalPacket) {
@@ -72,7 +66,19 @@ public class SenderHandler extends Handler {
 			}
 			isFinalPacket = isFinalPacket();
 		}
-
+	}
+	
+	private void waitForInitialACK()
+	{
+		try {
+			this.waitForACK();
+		} catch (SocketTimeoutException e) {
+			System.out.println("Timeout has occured resending the write request");
+			this.sendWriteRequest();
+			this.waitForInitialACK();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -82,6 +88,14 @@ public class SenderHandler extends Handler {
 		System.out.println("Sending Block: " + this.blockNumber);
 		DatagramPacket packet = createWritePacket();
 		Resources.printPacketInformation(packet);
+		Resources.sendPacket(packet, this.sendAndReceiveSocket);
+		System.out.println("Data sent\n");
+	}
+	
+	private void sendWriteRequest()
+	{
+		byte[] request = Resources.createRequest(Request.WRITE, this.filePath);
+		DatagramPacket packet =  new DatagramPacket(request, request.length, address, port);
 		Resources.sendPacket(packet, this.sendAndReceiveSocket);
 		System.out.println("Data sent\n");
 	}
@@ -110,7 +124,8 @@ public class SenderHandler extends Handler {
 		if (receivedAck != this.ackBlockNumber) {
 			// received delayed ACK packet since the block number of the ACK packet should
 			// be one less then the current block number
-			System.out.println("Recieved Delayed ACK Packet.Expected " + this.ackBlockNumber + " recieved is " + receivedAck);
+			System.out.println(
+					"Recieved Delayed ACK Packet.Expected " + this.ackBlockNumber + " recieved is " + receivedAck);
 			this.waitForACK();
 		}
 

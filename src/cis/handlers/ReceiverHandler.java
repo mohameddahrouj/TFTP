@@ -54,8 +54,8 @@ public class ReceiverHandler extends Handler {
 				DatagramPacket receivedPacket = waitForData();
 				// send Ack for data received
 				int blockNumber = Resources.getBlockNumber(receivedPacket.getData());
-				sendAck(blockNumber);
 				writeToFile(blockNumber,receivedPacket.getData());
+				sendAck(recievedBlocks);
 				isFinalPacket = isFinalPacket(receivedPacket);
 			} catch (SocketTimeoutException e) {
 				System.out.println("Timeout has occured on the Reciever side.");

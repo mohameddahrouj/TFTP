@@ -54,6 +54,25 @@ public class ErrorSimulator {
 
 		int clientPort = this.forwardClientPacket();
 		this.forwardServerPacket(clientPort);
+			new Thread(new Runnable() {
+				public void run()
+				{
+					while (true)
+					{
+						forwardClientPacket();
+					}
+				}
+			}).start();
+			new Thread(new Runnable() {
+				public void run()
+				{
+					while (true)
+					{
+						forwardServerPacket(clientPort);
+					}
+				}
+			}).start();
+		
 	}
 
 	/**
@@ -120,7 +139,6 @@ public class ErrorSimulator {
 			System.out.println("Error Simulator: Packet received from server:");
 			Resources.printPacketInformation(receivedServerPacket);
 
-			// save the port the server port
 			this.connections.put(clientPort, receivedServerPacket.getPort());
 
 			// Create new packet to send to client
@@ -152,9 +170,8 @@ public class ErrorSimulator {
 	public static void main(String[] args) {
 		ErrorSimulator es = new ErrorSimulator(new Operation());
 		// Listen forever...
-		while (true) {
-			es.sendAndReceive();
-		}
+		es.sendAndReceive();
+		
 	}
 
 }

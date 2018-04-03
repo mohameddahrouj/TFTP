@@ -59,7 +59,7 @@ public class SenderHandler extends Handler {
 				this.waitForACK();
 			} catch (SocketTimeoutException e) {
 				this.blockNumber--;
-				System.out.println("Timeout has occurred. Resending block number " + this.blockNumber);
+				System.out.println("Timeout has occurred. Resending block number " + (this.blockNumber+1));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -116,7 +116,7 @@ public class SenderHandler extends Handler {
 
 		if (type == Request.ERROR) {
 			IOErrorType error = super.getErrorType(receivedPacket.getData());
-			System.out.println("Recieved an error packet. Packet is of type " + error.getErrorMessage());
+			System.out.println("Recieved an error packet. Error is of type " + error.getErrorMessage());
 			if(error == IOErrorType.UnkownTransferID)
 			{
 				System.out.println("Resending the previous packet");

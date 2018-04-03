@@ -82,7 +82,7 @@ public class ReceiverHandler extends Handler {
 		
 		if (type == Request.ERROR) {
 			IOErrorType error = super.getErrorType(receivedPacket.getData());
-			System.out.println("Recieved an error packet. Packet is of type " + error.getErrorMessage());
+			System.out.println("Recieved an error packet. Error is of type " + error.getErrorMessage());
 			if(error == IOErrorType.UnkownTransferID)
 			{
 				System.out.println("Resending the previous packet");
@@ -150,7 +150,7 @@ public class ReceiverHandler extends Handler {
 		{
 			// if received data block is less then or equal to the most recent block then we
 			// already received this packet
-			System.out.println("Recieved Duplicate");
+			System.out.println("Recieved Duplicate data packet. Data will not be written to the file.");
 			return;
 		}
 

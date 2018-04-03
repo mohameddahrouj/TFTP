@@ -15,8 +15,7 @@ public class Operation {
 	public int delay;
 	private boolean hasErrorOccured;
 
-	public Operation() {
-		Scanner sn = new Scanner(System.in);
+	public Operation(Scanner sn) {
 		this.hasErrorOccured = false;
 		this.mode = getMode(sn);
 		if (mode != Mode.NORMAL) {
@@ -30,8 +29,6 @@ public class Operation {
 				this.delay = getNumber(sn);
 			}
 		}
-
-		sn.close();
 	}
 
 	/**

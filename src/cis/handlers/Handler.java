@@ -79,8 +79,6 @@ public abstract class Handler {
 		}
     }
     
-    
-    
     protected IOErrorType getErrorType(byte[] data)
     {
     	int errorCode = data[3];

@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -26,13 +27,17 @@ public class ErrorSimulator {
 	DatagramSocket clientSocket;
 	DatagramSocket serverSocket;
 	InetAddress address;
+	InetAddress serverIPaddress;
 	Operation operation;
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	private Map<Integer, Integer> connections;
-
-	public ErrorSimulator(Operation operation) {
-		try {
+	private Scanner inputScanner;
+	
+	public ErrorSimulator() {
+		try {	
+			this.inputScanner = new Scanner(System.in);
+			this.operation = new Operation(inputScanner);
 			this.connections = new HashMap<>();
 			// Initialize client socket at the shared port
 			clientSocket = new DatagramSocket(Resources.errorSimulatorPort);
@@ -41,7 +46,9 @@ public class ErrorSimulator {
 			serverSocket.setSoTimeout(Resources.timeout);
 			// Initialize address
 			address = InetAddress.getLocalHost();
-			this.operation = operation;
+			serverIPaddress = this.getIPAddress();
+			this.inputScanner.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -94,7 +101,7 @@ public class ErrorSimulator {
 			// Form new packet from received packet
 			System.out.println("\nError Simulator: Forming new Packet:");
 			DatagramPacket newPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getData().length,
-					address, serverPort);
+					serverIPaddress, serverPort);
 			// Send the newly formed packet to server
 			Operation.Mode mode = operation.sendPacket(newPacket, serverSocket);
 			System.out.println("\nError Simulator: Sending packet to server:");
@@ -161,6 +168,22 @@ public class ErrorSimulator {
 	{
 		return (mode == Mode.LOSE || mode == Mode.DELAY) && operation.type != Request.ACK;
 	}
+	
+	private InetAddress getIPAddress() {
+		System.out.println("Please Enter IP Address: ");
+		while (true) {
+			String ip = inputScanner.nextLine();
+			if (ip.length() != 0) {
+				try {
+					return InetAddress.getByName(ip);
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			System.out.println("Not a valid ip. Please reenter the IP address.");
+		}
+	}
 
 	/**
 	 * Execute the Error Simulator
@@ -168,10 +191,9 @@ public class ErrorSimulator {
 	 * @param args Arguments
 	 */
 	public static void main(String[] args) {
-		ErrorSimulator es = new ErrorSimulator(new Operation());
+		ErrorSimulator es = new ErrorSimulator();
 		// Listen forever...
 		es.sendAndReceive();
-		
 	}
 
 }

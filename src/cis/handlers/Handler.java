@@ -52,7 +52,7 @@ public abstract class Handler {
         byte[] ack = new byte[4];
         ack[0] = 0;
         ack[1] = prefix;
-        ack[2] = (byte) ( (blockNumber >> 7) & 0xFF);
+        ack[2] = (byte) ( (blockNumber >> 8) & 0xFF);
         ack[3] = (byte) ( (blockNumber) & 0xFF);
         return ack;
     }

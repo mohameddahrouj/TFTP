@@ -79,12 +79,6 @@ public class Resources {
 		// Construct a DatagramPacket for receiving packets
 		byte data[] = new byte[516];
 
-		// Initialize the array to contain all FF bytes. This way, when
-		// the data is filled in we can truncate all trailing FFs, since
-		// we know a valid request must end with a 0 byte. Otherwise,
-		// all packets would be 100 bytes long.
-		java.util.Arrays.fill(data, (byte) 0xFF);
-
 		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
 
 		// Block until a datagram is received via the socket
@@ -92,10 +86,26 @@ public class Resources {
 
 		// Truncate to remove trailing FFs so that we only get the intended
 		// data and its length.
-		receivePacket.setData(truncateData(data));
-		receivePacket.setLength(receivePacket.getData().length);
-
+		Request request = packetRequestType(receivePacket);
+		if (request == Request.ACK) {
+			receivePacket.setData(truncateACKData(data));
+			receivePacket.setLength(receivePacket.getData().length);
+		} else if (request == Request.DATA) {
+			receivePacket.setData(truncateData(data));
+			receivePacket.setLength(receivePacket.getData().length);
+		}
 		return receivePacket;
+	}
+
+	public static byte[] truncateACKData(byte[] data) {
+
+		byte[] truncatedData = new byte[4];
+
+		for (int i = 0; i < truncatedData.length; i++) {
+			truncatedData[i] = data[i];
+		}
+
+		return truncatedData;
 	}
 
 	/**
@@ -109,7 +119,7 @@ public class Resources {
 		int endIndex = 0;
 		int i = data.length - 1;
 
-		while (i >= 0 && data[i] == (byte) 0xFF) {
+		while (i >= 0 && data[i] == (byte) 0x00) {
 			i--;
 		}
 
@@ -127,7 +137,7 @@ public class Resources {
 	}
 
 	public static int getBlockNumber(byte[] data) {
-		return ((data[2] << 8) + data[3]);
+		return ((data[2] & 0xff) << 8) | (data[3] & 0xff);
 	}
 
 	/**
@@ -159,11 +169,11 @@ public class Resources {
 
 		return file.exists() && !file.isDirectory();
 	}
-	
+
 	/**
 	 * Create request format as per specification
 	 */
-	public static byte[] createRequest(Request request, String filePath){
+	public static byte[] createRequest(Request request, String filePath) {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
 		try {
@@ -172,9 +182,7 @@ public class Resources {
 			byteArrayOutputStream.write(0);
 			byteArrayOutputStream.write(octet.getBytes());
 			byteArrayOutputStream.write(0);
-		}
-		catch (IOException exception)
-		{
+		} catch (IOException exception) {
 			exception.printStackTrace();
 			System.exit(1);
 		}

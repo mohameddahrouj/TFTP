@@ -173,6 +173,6 @@ public class ReceiverHandler extends Handler {
 	 * @return
 	 */
 	private boolean isFinalPacket(DatagramPacket receivedPacket) {
-		return Resources.truncateData(receivedPacket.getData()).length < maxBlockLength;
+		return receivedPacket.getLength()< maxBlockLength;
 	}
 }

@@ -90,17 +90,6 @@ public class Resources {
 		return receivedPacket;
 	}
 
-	public static byte[] truncateACKData(byte[] data) {
-
-		byte[] truncatedData = new byte[4];
-
-		for (int i = 0; i < truncatedData.length; i++) {
-			truncatedData[i] = data[i];
-		}
-
-		return truncatedData;
-	}
-
 	/**
 	 * Remove trailing bytes from a byte array.
 	 * 

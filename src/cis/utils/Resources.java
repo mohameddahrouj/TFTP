@@ -79,61 +79,29 @@ public class Resources {
 		// Construct a DatagramPacket for receiving packets
 		byte data[] = new byte[516];
 
-		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
+		DatagramPacket receivedPacket = new DatagramPacket(data, data.length);
 
 		// Block until a datagram is received via the socket
-		socket.receive(receivePacket);
+		socket.receive(receivedPacket);	
 
-		// Truncate to remove trailing FFs so that we only get the intended
-		// data and its length.
-		Request request = packetRequestType(receivePacket);
-		if (request == Request.ACK) {
-			receivePacket.setData(truncateACKData(data));
-			receivePacket.setLength(receivePacket.getData().length);
-		} else if (request == Request.DATA) {
-			receivePacket.setData(truncateData(data));
-			receivePacket.setLength(receivePacket.getData().length);
-		}
-		return receivePacket;
-	}
-
-	public static byte[] truncateACKData(byte[] data) {
-
-		byte[] truncatedData = new byte[4];
-
-		for (int i = 0; i < truncatedData.length; i++) {
-			truncatedData[i] = data[i];
-		}
-
-		return truncatedData;
+		receivedPacket.setData(truncateData(receivedPacket));
+		receivedPacket.setLength(receivedPacket.getData().length);
+		
+		return receivedPacket;
 	}
 
 	/**
-	 * Remove trailing FF bytes from a byte array.
+	 * Remove trailing bytes from a byte array.
 	 * 
 	 * @param data
 	 *            The data
 	 * @return Data with trailing FF bytes removed
 	 */
-	public static byte[] truncateData(byte[] data) {
-		int endIndex = 0;
-		int i = data.length - 1;
+	public static byte[] truncateData(DatagramPacket packet) {
+		byte[] data = new byte[packet.getLength()];
+		System.arraycopy(packet.getData(), packet.getOffset(), data, 0, packet.getLength());
 
-		while (i >= 0 && data[i] == (byte) 0x00) {
-			i--;
-		}
-
-		if (i < 0)
-			return new byte[] {};
-
-		endIndex = i;
-		byte[] truncatedData = new byte[endIndex + 1];
-
-		for (i = 0; i <= endIndex; i++) {
-			truncatedData[i] = data[i];
-		}
-
-		return truncatedData;
+		return data;
 	}
 
 	public static int getBlockNumber(byte[] data) {
